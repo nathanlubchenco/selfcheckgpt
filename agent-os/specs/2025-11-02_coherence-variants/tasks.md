@@ -3,7 +3,7 @@
 ## Overview
 Total Task Groups: 5
 Estimated Development Time: Medium-Large (research + implementation)
-Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
+Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 
 ## Task List
 
@@ -50,15 +50,16 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
 
 - [ ] 2.0 Complete shared API client infrastructure
   - [ ] 2.1 Create `selfcheckgpt/modeling_coherence_api.py` with CoherenceAPIClient base class
-    - Support client_type parameter ("openai" or "groq")
-    - Initialize OpenAI client (default) or Groq client with api_key
+    - Initialize OpenAI client with api_key (defaults to OPENAI_API_KEY environment variable)
     - Follow pattern from `SelfCheckAPIPrompt` in `modeling_selfcheck_apiprompt.py`
-    - Print initialization message with client type and model
-  - [ ] 2.2 Implement deterministic completion method
-    - Create `completion(prompt: str) -> str` method
+    - Print initialization message with model name
+  - [ ] 2.2 Implement deterministic completion method with structured output
+    - Create `completion(prompt: str) -> float` method that returns probability value
     - Set temperature=0.0 for deterministic responses
-    - Set max_tokens=20 for concise probability responses
-    - Handle both OpenAI and Groq API call patterns
+    - Use OpenAI's structured output feature with JSON schema for reliable probability extraction
+    - Define response_format with JSON schema: `{"probability": float}` with constraints [0.0, 1.0]
+    - Parse JSON response and extract probability value
+    - Set max_tokens=20 for concise responses
   - [ ] 2.3 Implement prompt response caching mechanism
     - Create dictionary cache keyed by (prompt_text, model_name) tuple
     - Implement cache lookup before API calls
@@ -70,29 +71,22 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
     - Handle authentication failures with actionable error messages
     - Log warnings for retries and cache misses
   - [ ] 2.5 Implement probability extraction prompt templates
-    - Create prompt template for individual probability: "Rate the probability [0.0-1.0] that this statement is true: {statement}"
-    - Create prompt template for joint probability: "Rate the probability [0.0-1.0] that both statements are true: {statement1} AND {statement2}"
-    - Create prompt template for conditional probability: "Rate the probability [0.0-1.0] that statement A is true: {statement1} GIVEN that {statement2} is true"
-  - [ ] 2.6 Implement probability parsing from text responses
-    - Create `parse_probability(text: str) -> float` method
-    - Handle numeric formats: "0.7", "0.70", ".7"
-    - Handle percentage formats: "70%", "70 percent"
-    - Handle text formats: "probability is 0.7", "The probability is approximately 0.7"
-    - Default to 0.5 for unparseable responses with warning log
-    - Clamp values to [0.0, 1.0] range
-    - Can we use output schema support to reduce the effort here and increase consistency.  I think openai supports this. If we need to simplfy by removing groq we can.
+    - Create prompt template for individual probability: "Rate the probability that this statement is true: {statement}"
+    - Create prompt template for joint probability: "Rate the probability that both statements are true: {statement1} AND {statement2}"
+    - Create prompt template for conditional probability: "Rate the probability that statement A is true: {statement1} GIVEN that {statement2} is true"
+    - All prompts use structured output, so no need to specify "[0.0-1.0]" in prompt text
   - [ ] 2.7 Add cache statistics and cost estimation utilities
     - Implement `get_cache_stats()` returning hit rate and size
     - Implement `estimate_api_calls(num_sentences, num_samples, num_variants)` for cost estimation
     - Log cache hit rates when verbose=True
 
 **Acceptance Criteria:**
-- CoherenceAPIClient initializes with both OpenAI and Groq
+- CoherenceAPIClient initializes with OpenAI client
 - Deterministic completions work with temperature=0.0
+- Structured output (JSON schema) ensures reliable probability extraction
 - Caching mechanism reduces duplicate API calls
 - Retry logic handles transient failures gracefully
-- Probability parsing handles common text formats correctly
-- Unparseable responses default to 0.5 with warnings
+- All probability values are guaranteed to be valid floats in [0.0, 1.0] range
 
 ---
 
@@ -159,9 +153,9 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
     - Import coherence formulas from utils_coherence
     - Import numpy, tqdm for progress tracking
   - [ ] 4.2 Implement SelfCheckShogenji class
-    - Class signature: `SelfCheckShogenji(client_type="openai", model="gpt-4o-mini", api_key=None)`
+    - Class signature: `SelfCheckShogenji(model="gpt-4o-mini", api_key=None)`
     - Initialize CoherenceAPIClient in `__init__`
-    - Store client_type, model, api_key as instance attributes
+    - Store model and api_key as instance attributes
   - [ ] 4.3 Implement SelfCheckShogenji.predict() method
     - Method signature: `predict(sentences: List[str], sampled_passages: List[str], verbose: bool = False) -> np.ndarray`
     - For each sentence, extract P(sentence) using individual probability prompt
@@ -220,19 +214,20 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
 - [ ] 5.0 Complete configuration and constants
   - [ ] 5.1 Add CoherenceConfig class to `selfcheckgpt/utils.py`
     - Define default OpenAI model: "gpt-4o-mini"
-    - Define default Groq model: "llama3-70b-8192"
+    - Store JSON schema for structured probability output
     - Store epsilon constant: 1e-12
     - Store max_tokens for probability extraction: 20
     - Follow pattern of MQAGConfig and NLIConfig in utils.py
   - [ ] 5.2 Add probability extraction prompt templates to CoherenceConfig
-    - individual_prob_template: "Rate the probability [0.0-1.0] that this statement is true: {statement}"
-    - joint_prob_template: "Rate the probability [0.0-1.0] that both statements are true: {statement1} AND {statement2}"
-    - conditional_prob_template: "Rate the probability [0.0-1.0] that statement A is true: {statement1} GIVEN that {statement2} is true"
+    - individual_prob_template: "Rate the probability that this statement is true: {statement}"
+    - joint_prob_template: "Rate the probability that both statements are true: {statement1} AND {statement2}"
+    - conditional_prob_template: "Rate the probability that statement A is true: {statement1} GIVEN that {statement2} is true"
     - Store as class attributes for easy customization
+    - Note: Structured output JSON schema handles format, not prompt text
   - [ ] 5.3 Add numerical constants for score normalization
     - normalization_epsilon: 1e-12 (for preventing division by zero in normalization)
-    - default_unparseable_prob: 0.5 (fallback for unparseable probability responses)
     - score_bounds: (0.0, 1.0) (output hallucination score range)
+    - Note: No need for default_unparseable_prob due to structured output
   - [ ] 5.4 Update module exports in `selfcheckgpt/__init__.py`
     - Add imports for SelfCheckShogenji, SelfCheckFitelson, SelfCheckOlsson
     - Add import for CoherenceAPIClient if exposing publicly
@@ -266,7 +261,7 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
     - Calculate AUC-PR using sklearn.metrics.average_precision_score
     - Calculate PCC (Pearson) using scipy.stats.pearsonr
     - Calculate AUC-ROC using sklearn.metrics.roc_auc_score
-    - Support command-line arguments: --variant (shogenji/fitelson/olsson/all), --model, --client-type, --num-samples
+    - Support command-line arguments: --variant (shogenji/fitelson/olsson/all), --model, --num-samples
   - [ ] 6.3 Implement results output and comparison
     - Save results to JSON file: `results/coherence_evaluation_{timestamp}.json`
     - JSON structure: {variant_name: {auc_pr: float, pcc: float, auc_roc: float}}
@@ -282,7 +277,7 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
   - [ ] 6.5 Add cost estimation and logging
     - Log total API calls made during evaluation
     - Log cache hit rate and savings
-    - Estimate total cost based on API pricing (OpenAI: $X per 1K tokens, Groq: varies)
+    - Estimate total cost based on OpenAI API pricing (gpt-4o-mini pricing)
     - Print cost summary at end of evaluation
   - [ ] 6.6 Run validation experiments
     - Test each variant on small subset (10 passages) and inspect outputs manually
@@ -311,8 +306,8 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
   - [ ] 7.1 Update main README.md with coherence variants
     - Add section "Coherence-Based Detection" after existing variants
     - Include usage examples for SelfCheckShogenji, SelfCheckFitelson, SelfCheckOlsson
-    - Document required API keys (OpenAI or Groq)
-    - Show example of probability extraction caching
+    - Document required API key (OPENAI_API_KEY environment variable)
+    - Show example of probability extraction caching and structured output
   - [ ] 7.2 Create coherence-specific documentation
     - Write `docs/coherence_variants.md` with detailed explanation
     - Include mathematical formulas for each coherence measure
@@ -333,9 +328,9 @@ Architecture: Hybrid (OpenAI/Groq APIs + NumPy/SciPy for coherence formulas)
     - Update module structure diagram
   - [ ] 7.5 Create minimal usage example script
     - Write `examples/coherence_example.py` showing basic usage
-    - Demonstrate initialization with OpenAI and Groq
+    - Demonstrate initialization with OpenAI
     - Show predict() call with sample sentences and passages
-    - Include cache statistics output
+    - Include cache statistics output and structured output explanation
     - Make it copy-paste ready for quick start
   - [ ] 7.6 Verify package integration
     - Ensure all new modules import correctly

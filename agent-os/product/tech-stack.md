@@ -11,10 +11,11 @@
 ### Hybrid Architecture: LLM APIs + Mathematical Coherence
 
 **LLM Integration (Probability Estimation)**
-- **OpenAI API:** openai library for GPT-3.5-turbo, GPT-4 access
-- **Groq API:** groq library for Llama3-70b-8192, other open models
+- **OpenAI API:** openai library for GPT-3.5-turbo, GPT-4, GPT-4o-mini access
+- **Structured Output:** JSON schema for reliable probability extraction (OpenAI structured output feature)
 - **Prompt Engineering:** Custom prompts to extract probability estimates (e.g., "Rate the probability this statement is true: [statement]")
-- **API Client Management:** Leverage existing `SelfCheckAPIPrompt` infrastructure
+- **API Client Management:** Leverage existing `SelfCheckAPIPrompt` infrastructure pattern
+- **Decision (2025-11-02):** OpenAI only (no Groq) to leverage structured output support and reduce complexity
 
 **Coherence Calculation (Mathematical Formulas)**
 - **Numerical Computing:** NumPy (array operations, probability calculations)
@@ -23,9 +24,10 @@
 - **Coherence Theory Implementation:** Pure Python + NumPy (CPU-only, no GPU required)
 
 **Decision Rationale (2025-11-02):**
-- Prompt-based probability extraction is most general (not restricted to logprobs support)
+- Structured output (JSON schema) is more reliable than text parsing for probability extraction
+- OpenAI-only approach reduces complexity vs. supporting multiple providers
 - Separates concerns: LLM APIs handle probability estimation, NumPy/SciPy handles coherence formulas
-- Allows swapping LLM providers without changing coherence logic
+- Can add other providers later if they support similar structured output features
 
 ## Existing SelfCheckGPT Infrastructure (Leveraged)
 - **Tokenization:** spacy (sentence splitting, consistent with existing variants)
@@ -60,8 +62,8 @@
 - Load large pre-trained models (DeBERTa, T5, Longformer)
 
 ### Coherence Variants (Hybrid: API + CPU-based)
-- SelfCheckShogenji, Fitelson, Olsson use OpenAI/Groq APIs + NumPy + SciPy
-- **Step 1:** API calls to LLMs for probability estimation (prompt-based assessment)
+- SelfCheckShogenji, Fitelson, Olsson use OpenAI API + NumPy + SciPy
+- **Step 1:** API calls to OpenAI for probability estimation (structured output with JSON schema)
 - **Step 2:** CPU-only mathematical computations for coherence formulas
 - No local model loading - APIs handle LLM inference remotely
 - Lightweight local execution (only mathematical formulas run locally)
@@ -83,18 +85,15 @@ Existing dependencies already available (from base SelfCheckGPT):
 - scikit-learn (evaluation metrics)
 - spacy (sentence tokenization)
 - **openai** (OpenAI API - already in base requirements)
-- **groq** (Groq API - already in base requirements)
 
 ## Development Environment
 
 Minimal setup for coherence work:
 ```bash
-pip install -e .  # Install base SelfCheckGPT (includes openai, groq)
+pip install -e .  # Install base SelfCheckGPT (includes openai)
 pip install scipy pytest matplotlib seaborn  # Add coherence dependencies
 python -m spacy download en_core_web_sm  # Sentence tokenization
 export OPENAI_API_KEY="your-key"  # Set API key for OpenAI
-# OR
-export GROQ_API_KEY="your-key"  # Set API key for Groq
 ```
 
 No GPU, Docker, or complex infrastructure required. Only API keys needed for LLM access.

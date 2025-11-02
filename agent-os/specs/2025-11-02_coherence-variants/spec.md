@@ -10,18 +10,20 @@ Extend SelfCheckGPT with three formal coherence theory-based hallucination detec
 ## Specific Requirements
 
 **Shared API Client Infrastructure**
-- Create `CoherenceAPIClient` base class in `selfcheckgpt/modeling_coherence_api.py` that wraps OpenAI and Groq clients similar to `SelfCheckAPIPrompt`
-- Support client_type parameter ("openai" or "groq") with automatic client initialization from API keys
+- Create `CoherenceAPIClient` base class in `selfcheckgpt/modeling_coherence_api.py` that wraps OpenAI client similar to `SelfCheckAPIPrompt`
+- Initialize OpenAI client with automatic API key detection from environment (OPENAI_API_KEY)
 - Implement temperature=0.0 deterministic completion method for consistency across probability extraction calls
+- Use OpenAI's structured output support (JSON schema) for reliable probability extraction
 - Include prompt response caching mechanism using dictionary keyed by (prompt_text, model_name) to minimize API costs during evaluation
 - Handle API errors gracefully with retry logic and clear error messages for rate limits or authentication failures
 
 **Probability Extraction via Prompting**
-- Implement prompt templates for extracting individual statement probabilities using pattern "Rate the probability [0.0-1.0] that this statement is true: [statement]"
-- Create prompt templates for joint probability estimation asking "Rate the probability [0.0-1.0] that both statements are true: [statement1] AND [statement2]"
-- Create prompt templates for conditional probability estimation asking "Rate the probability [0.0-1.0] that statements A is true: [statement1] GIVEN that [statement2] is true"
-- Parse LLM text responses to extract numeric probability values, handling variations like "0.7", "70%", "probability is 0.7"
-- Default to 0.5 probability for unparseable responses with warning logging (strongly consider other options here)
+- Implement prompt templates for extracting individual statement probabilities using pattern "Rate the probability that this statement is true: [statement]"
+- Create prompt templates for joint probability estimation asking "Rate the probability that both statements are true: [statement1] AND [statement2]"
+- Create prompt templates for conditional probability estimation asking "Rate the probability that statement A is true: [statement1] GIVEN that [statement2] is true"
+- Use OpenAI's structured output feature with JSON schema to ensure responses are always valid JSON: `{"probability": float}`
+- Structured output eliminates need for text parsing and reduces errors
+- Set response_format parameter with JSON schema for probability values in [0.0, 1.0] range
 - Max tokens set to 20 to keep responses concise and minimize costs
 
 **Coherence Formula Implementations**
@@ -35,7 +37,7 @@ Extend SelfCheckGPT with three formal coherence theory-based hallucination detec
 
 **SelfCheckShogenji Detection Variant**
 - Implement `SelfCheckShogenji` class in `selfcheckgpt/modeling_coherence.py` following existing SelfCheck class patterns
-- Initialize with client_type, model, and api_key parameters matching `SelfCheckAPIPrompt` signature
+- Initialize with model and api_key parameters (default model="gpt-4o-mini")
 - Implement `predict(sentences, sampled_passages, verbose=False)` returning sentence-level hallucination scores
 - For each sentence, extract probabilities from LLM for the sentence alone and jointly with each sampled passage
 - Calculate Shogenji coherence between sentence and each sample using `coherence_shogenji()` formula (i'm not sure about this either, lets discuss further)
@@ -61,7 +63,8 @@ Extend SelfCheckGPT with three formal coherence theory-based hallucination detec
 **Configuration and Constants**
 - Add `CoherenceConfig` class to `selfcheckgpt/utils.py` with default model configurations
 - Include default probability extraction prompt templates as class attributes
-- Define default OpenAI model as "gpt-4o-mini" and default Groq model as "llama3-70b-8192"
+- Define default OpenAI model as "gpt-4o-mini"
+- Store JSON schema for structured probability output
 - Store numerical stability constants (epsilon, score normalization bounds)
 
 **Hallucination Score Mapping**
@@ -72,12 +75,12 @@ Extend SelfCheckGPT with three formal coherence theory-based hallucination detec
 
 **Unit Testing with Mocked APIs**
 - Create `tests/test_coherence_variants.py` using pytest framework
-- Mock OpenAI and Groq API responses using unittest.mock to avoid API costs during testing
+- Mock OpenAI API responses using unittest.mock to avoid API costs during testing
 - Test each coherence variant's predict() method with fixed mock responses to verify score calculation
-- Test probability extraction parsing with various response formats (numeric, percentage, text)
+- Test probability extraction with JSON schema validation
 - Test numerical stability with edge cases (zero probabilities, near-zero probabilities)
 - Test caching mechanism ensures duplicate prompts reuse cached responses
-- Test error handling for API failures, unparseable responses, and invalid inputs
+- Test error handling for API failures and invalid inputs
 
 **Evaluation Dataset Access**
 - Create `scripts/evaluate_coherence.py` standalone script loading wiki_bio_gpt3_hallucination via datasets library
@@ -99,7 +102,7 @@ Extend SelfCheckGPT with three formal coherence theory-based hallucination detec
 - Extending coherence measures beyond the three specified variants (Shogenji, Fitelson, Olsson)
 - Implementing set-based coherence aggregation beyond simple mean of pairwise comparisons
 - Supporting logprobs-based probability extraction (prompt-based approach is sufficient)
-- Integration with non-OpenAI/Groq API providers in initial version
+- Integration with non-OpenAI API providers (e.g., Groq, Anthropic, etc.) in initial version
 - Real-time streaming evaluation or production deployment optimization
 - GUI or web interface for coherence detection
 - Automatic hyperparameter tuning for prompt templates or coherence formula parameters

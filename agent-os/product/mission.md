@@ -54,21 +54,23 @@ Unlike building a new package from scratch, we extend the mature SelfCheckGPT in
 ### Hybrid Architecture: LLM APIs + Coherence Formulas
 
 **Probability Estimation via Prompt-Based Assessment (Decision: 2025-11-02)**
-- Use OpenAI/Groq APIs to extract probability estimates through carefully designed prompts
+- Use OpenAI API with structured output (JSON schema) to extract probability estimates
 - Example prompts: "Rate the probability this statement is true: [statement]" or "How likely is it that both statements are true?"
-- Prompt-based approach is most general (not restricted to models with logprobs support)
-- Leverages existing `SelfCheckAPIPrompt` infrastructure for API integration
+- Structured output ensures reliable probability extraction without text parsing complexity
+- Leverages existing `SelfCheckAPIPrompt` infrastructure pattern for API integration
+- **Simplified approach (Updated 2025-11-02):** OpenAI only (no Groq) to leverage structured output support
 
 **Coherence Calculation Pipeline**
 1. **Input:** Sentences to evaluate + sampled passages (standard SelfCheck interface)
-2. **LLM API Calls:** Query OpenAI/Groq to assess individual statement probabilities (P(A), P(B)) and joint probabilities (P(A ∧ B))
+2. **LLM API Calls:** Query OpenAI with structured output to assess individual statement probabilities (P(A), P(B)) and joint probabilities (P(A ∧ B))
 3. **Coherence Formula:** Feed probability estimates into NumPy/SciPy implementations of Shogenji/Fitelson/Olsson formulas
 4. **Output:** Sentence-level hallucination scores (higher = more likely hallucination)
 
 **Why This Architecture?**
-- **Generality:** Prompt-based probability extraction works with any chat-completion API
-- **Flexibility:** Can swap LLM providers (OpenAI, Groq, future providers) without changing coherence logic
+- **Reliability:** Structured output (JSON schema) ensures consistent, parseable probability values
+- **Simplicity:** Single API provider (OpenAI) reduces complexity and maintenance burden
 - **Theoretical Grounding:** Coherence formulas remain mathematically pure while leveraging state-of-the-art LLMs for probability estimation
+- **Future Extensibility:** Can add other providers later if they support structured output
 
 ## Key Features
 
