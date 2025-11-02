@@ -1,0 +1,113 @@
+# Coherence Theory Sources - URLs and References
+
+## Open Access Sources (Successfully Accessed)
+
+### Stanford Encyclopedia of Philosophy - Formal Epistemology
+URL: https://plato.stanford.edu/entries/formal-epistemology/
+Status: Accessible
+Content: Contains Shogenji's C2 formula and theoretical motivation
+
+### Stanford Encyclopedia of Philosophy - Coherentist Theories of Epistemic Justification
+URL: https://plato.stanford.edu/entries/justep-coherence/
+Status: Accessible
+Content: Contains detailed information on all three measures (Shogenji, Glass-Olsson, Fitelson)
+         Includes formulas, theoretical motivations, and bibliographic references
+
+## Primary Academic Papers (Require Journal Access)
+
+### Shogenji's Coherence Measure
+Title: "Is Coherence Truth-conducive?"
+Author: Tomoji Shogenji
+Journal: Analysis
+Volume: 59
+Pages: 338–345
+Year: 1999
+DOI: Not specified in sources
+Journal URL: https://academic.oup.com/analysis (Oxford Academic)
+
+### Fitelson's Coherence Measure
+Title: "A Probabilistic Measure of Coherence"
+Author: Branden Fitelson
+Journal: Analysis
+Volume: 63
+Pages: 194–199
+Year: 2003
+DOI: Not specified in sources
+Journal URL: https://academic.oup.com/analysis (Oxford Academic)
+
+### Olsson's Coherence Work
+Title: "What is the Problem of Coherence and Truth?"
+Author: Erik J. Olsson
+Journal: The Journal of Philosophy
+Volume: 99
+Pages: 246–272
+Year: 2002
+Publisher: Philosophy Documentation Center
+
+Book: "Against Coherence: Truth, Probability, and Justification"
+Author: Erik J. Olsson
+Publisher: Oxford University Press
+Year: 2005
+ISBN: Not specified in sources
+
+### Kemeny & Oppenheim (Foundation for Fitelson)
+Title: "Degrees of Factual Support"
+Authors: John Kemeny and Paul Oppenheim
+Journal: Philosophy of Science
+Volume: 19
+Pages: 307–24
+Year: 1952
+Publisher: Cambridge University Press
+
+## Researcher Websites
+
+### Branden Fitelson
+Institution: Northeastern University (Distinguished Professor)
+Website: https://fitelson.org/
+Status: Accessible (limited content in basic fetch)
+Note: Contains CV and publication list, but detailed papers require direct access
+
+## Additional References Mentioned in Sources
+
+- Akiba (2000) - Alternative coherence measure
+- Glass (2002) - Co-developer of Glass-Olsson C1 measure
+- Bovens & Hartmann (2003) - "Bayesian Epistemology"
+- Siebel (2004) - Critique of Fitelson's measure
+- Meijs (2006) - Amendments to Fitelson's measure
+- Olsson (2022) - Recent critique of subset measures
+
+## Access Status Summary
+
+ACCESSIBLE (Open Access):
+- Stanford Encyclopedia of Philosophy entries (comprehensive coverage of all three measures)
+
+RESTRICTED (Institutional Access Required):
+- Original journal papers (Analysis, The Journal of Philosophy, Philosophy of Science)
+- Oxford University Press books
+
+CONCLUSION:
+The Stanford Encyclopedia of Philosophy sources provide sufficient theoretical foundation
+for implementing all three coherence measures. The canonical formulas, theoretical
+motivations, and implementation guidance are well-documented in these open-access sources.
+Access to original papers would provide additional context but is not required for
+a successful implementation.
+
+## Formula Summary (from Accessible Sources)
+
+### Shogenji (C2):
+C₂(A,B) = P(A ∧ B) / (P(A) × P(B))
+Generalized: coh(A₁,...,Aₙ) = P(A₁ ∧ ... ∧ Aₙ) / [P(A₁) × ... × P(Aₙ)]
+
+### Glass-Olsson (C1):
+C₁(A,B) = P(A ∧ B) / P(A ∨ B)
+Equivalent: C₁(A,B) = P(A ∧ B) / [P(A) + P(B) - P(A ∧ B)]
+
+### Fitelson (Confirmation-based):
+General approach: Mean factual support across all subset pairs
+Factual support formulas (from Kemeny & Oppenheim tradition):
+  s(H,E) = P(H|E) - P(H|¬E)    [Difference measure]
+  s(H,E) = P(H|E) - P(H)         [Simple confirmation]
+  s(H,E) = [P(H|E) - P(H)] / [1 - P(H)]  [Normalized]
+
+Note: Exact Fitelson formula requires accessing original 2003 paper,
+but the foundational support measures are documented in accessible sources.

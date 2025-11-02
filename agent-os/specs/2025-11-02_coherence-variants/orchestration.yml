@@ -1,0 +1,8 @@
+task_groups:
+  - name: Coherence Theory Research
+  - name: API Client and Probability Extraction Infrastructure
+  - name: Mathematical Coherence Measures
+  - name: SelfCheck Coherence Variants
+  - name: Configuration Management
+  - name: Interactive Validation (No Formal Tests Required)
+  - name: Documentation and Package Integration

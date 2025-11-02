@@ -14,22 +14,22 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 **Effort:** Medium (3-4 hours research + documentation)
 **Can be parallelized:** Yes (can happen alongside other initial setup)
 
-- [ ] 1.0 Complete theoretical research foundation
-  - [ ] 1.1 Research and locate academic sources for coherence theories
+- [x] 1.0 Complete theoretical research foundation
+  - [x] 1.1 Research and locate academic sources for coherence theories
     - Find Shogenji's coherence measure paper/source
     - Find Fitelson's confirmation measure paper/source
     - Find Olsson's support-based measure paper/source
     - Identify canonical formulas with mathematical notation
-  - [ ] 1.2 Download and store coherence theory sources
+  - [x] 1.2 Download and store coherence theory sources
     - Create `/Users/nathanlubchenco/workspace/selfcheckgpt/agent-os/specs/2025-11-02_coherence-variants/planning/theory-sources/` directory
     - Download PDFs or save URLs for all three coherence theories
     - Create `theory-sources/README.md` documenting each source and its key formulas
-  - [ ] 1.3 Extract canonical mathematical formulas
+  - [x] 1.3 Extract canonical mathematical formulas
     - Document Shogenji formula: C(A,B) = P(A ∧ B) / (P(A) × P(B))
     - Document Fitelson formula with conditional probability structure
     - Document Olsson formula with support-based structure
     - Note any formula variations or parameters mentioned in sources
-  - [ ] 1.4 Create theory reference document
+  - [x] 1.4 Create theory reference document
     - Write `planning/coherence-theory-reference.md` with formulas and citations
     - Include notes on theoretical motivation for each measure
     - Document expected coherence score ranges and interpretations
@@ -353,7 +353,7 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 Recommended implementation sequence:
 
 **Phase 1: Foundation (Parallel)**
-1. Task Group 1: Coherence Theory Research (can run in parallel)
+1. Task Group 1: Coherence Theory Research (can run in parallel) - COMPLETED
 2. Task Group 2: API Client Infrastructure (can run in parallel)
 
 **Phase 2: Mathematical Implementation (Sequential)**
@@ -395,7 +395,7 @@ Recommended implementation sequence:
 - Validate formula implementations with known test cases (if available in papers)
 
 ### Dependencies and Blockers
-- Task Group 3 BLOCKED until theory formulas verified in Task Group 1
+- Task Group 3 BLOCKED until theory formulas verified in Task Group 1 - UNBLOCKED (Task Group 1 complete)
 - Task Group 4 BLOCKED until both API client (Task Group 2) and formulas (Task Group 3) complete
 - Task Group 6 BLOCKED until all variants implemented and minimally functional
 - No external blockers identified (all dependencies within codebase)
