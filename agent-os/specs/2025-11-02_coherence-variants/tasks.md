@@ -48,34 +48,34 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 **Dependencies:** None (can run in parallel with Task Group 1)
 **Effort:** Medium (4-5 hours)
 
-- [ ] 2.0 Complete shared API client infrastructure
-  - [ ] 2.1 Create `selfcheckgpt/modeling_coherence_api.py` with CoherenceAPIClient base class
+- [x] 2.0 Complete shared API client infrastructure
+  - [x] 2.1 Create `selfcheckgpt/modeling_coherence_api.py` with CoherenceAPIClient base class
     - Initialize OpenAI client with api_key (defaults to OPENAI_API_KEY environment variable)
     - Follow pattern from `SelfCheckAPIPrompt` in `modeling_selfcheck_apiprompt.py`
     - Print initialization message with model name
-  - [ ] 2.2 Implement deterministic completion method with structured output
+  - [x] 2.2 Implement deterministic completion method with structured output
     - Create `completion(prompt: str) -> float` method that returns probability value
     - Set temperature=0.0 for deterministic responses
     - Use OpenAI's structured output feature with JSON schema for reliable probability extraction
     - Define response_format with JSON schema: `{"probability": float}` with constraints [0.0, 1.0]
     - Parse JSON response and extract probability value
     - Set max_tokens=20 for concise responses
-  - [ ] 2.3 Implement prompt response caching mechanism
+  - [x] 2.3 Implement prompt response caching mechanism
     - Create dictionary cache keyed by (prompt_text, model_name) tuple
     - Implement cache lookup before API calls
     - Implement cache storage after successful API calls
     - Add optional LRU cache with max_size=10000 (use functools.lru_cache or manual implementation)
-  - [ ] 2.4 Add retry logic and error handling
+  - [x] 2.4 Add retry logic and error handling
     - Implement retry decorator with exponential backoff (max 3 retries)
     - Handle rate limit errors with clear messages
     - Handle authentication failures with actionable error messages
     - Log warnings for retries and cache misses
-  - [ ] 2.5 Implement probability extraction prompt templates
+  - [x] 2.5 Implement probability extraction prompt templates
     - Create prompt template for individual probability: "Rate the probability that this statement is true: {statement}"
     - Create prompt template for joint probability: "Rate the probability that both statements are true: {statement1} AND {statement2}"
     - Create prompt template for conditional probability: "Rate the probability that statement A is true: {statement1} GIVEN that {statement2} is true"
     - All prompts use structured output, so no need to specify "[0.0-1.0]" in prompt text
-  - [ ] 2.7 Add cache statistics and cost estimation utilities
+  - [x] 2.7 Add cache statistics and cost estimation utilities
     - Implement `get_cache_stats()` returning hit rate and size
     - Implement `estimate_api_calls(num_sentences, num_samples, num_variants)` for cost estimation
     - Log cache hit rates when verbose=True
@@ -354,7 +354,7 @@ Recommended implementation sequence:
 
 **Phase 1: Foundation (Parallel)**
 1. Task Group 1: Coherence Theory Research (can run in parallel) - COMPLETED
-2. Task Group 2: API Client Infrastructure (can run in parallel)
+2. Task Group 2: API Client Infrastructure (can run in parallel) - COMPLETED
 
 **Phase 2: Mathematical Implementation (Sequential)**
 3. Task Group 3: Coherence Formula Implementations (requires Task Group 1)
