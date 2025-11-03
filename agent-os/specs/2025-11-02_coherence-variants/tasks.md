@@ -147,16 +147,16 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 **Dependencies:** Task Groups 2 (API client) and 3 (formulas)
 **Effort:** Large (6-8 hours for all three variants)
 
-- [ ] 4.0 Complete all three coherence detection variants
-  - [ ] 4.1 Create `selfcheckgpt/modeling_coherence.py` module
+- [x] 4.0 Complete all three coherence detection variants
+  - [x] 4.1 Create `selfcheckgpt/modeling_coherence.py` module
     - Import CoherenceAPIClient from modeling_coherence_api
     - Import coherence formulas from utils_coherence
     - Import numpy, tqdm for progress tracking
-  - [ ] 4.2 Implement SelfCheckShogenji class
+  - [x] 4.2 Implement SelfCheckShogenji class
     - Class signature: `SelfCheckShogenji(model="gpt-4o-mini", api_key=None)`
     - Initialize CoherenceAPIClient in `__init__`
     - Store model and api_key as instance attributes
-  - [ ] 4.3 Implement SelfCheckShogenji.predict() method
+  - [x] 4.3 Implement SelfCheckShogenji.predict() method
     - Method signature: `predict(sentences: List[str], sampled_passages: List[str], verbose: bool = False) -> np.ndarray`
     - For each sentence, extract P(sentence) using individual probability prompt
     - For each sentence-sample pair, extract P(sentence), P(sample), P(sentence ∧ sample) using joint probability prompt
@@ -166,11 +166,11 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
     - Invert normalized scores: hallucination_score = 1.0 - normalized_coherence
     - Return sentence-level hallucination scores as np.ndarray shape (num_sentences,)
     - Add tqdm progress bar when verbose=True
-  - [ ] 4.4 Implement SelfCheckFitelson class
+  - [x] 4.4 Implement SelfCheckFitelson class
     - Class signature matching SelfCheckShogenji
     - Initialize CoherenceAPIClient
     - Follow same initialization pattern
-  - [ ] 4.5 Implement SelfCheckFitelson.predict() method
+  - [x] 4.5 Implement SelfCheckFitelson.predict() method
     - Method signature matching SelfCheckShogenji.predict()
     - Extract individual probabilities: P(sentence), P(sample)
     - Extract joint probability: P(sentence ∧ sample)
@@ -179,16 +179,16 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
     - Handle cases where conditional probability is unreliable (fall back to joint/individual approximation)
     - Aggregate, normalize, invert to hallucination scores
     - Return sentence-level scores with same shape as other variants
-  - [ ] 4.6 Implement SelfCheckOlsson class
+  - [x] 4.6 Implement SelfCheckOlsson class
     - Class signature matching other variants
     - Initialize CoherenceAPIClient
-  - [ ] 4.7 Implement SelfCheckOlsson.predict() method
+  - [x] 4.7 Implement SelfCheckOlsson.predict() method
     - Method signature matching other variants
     - Extract probabilities for support relationship assessment
     - Calculate Olsson coherence using `coherence_olsson()`
     - Aggregate, normalize, invert to hallucination scores
     - Ensure output shape and range match other variants for drop-in replacement
-  - [ ] 4.8 Ensure consistent behavior across all variants
+  - [x] 4.8 Ensure consistent behavior across all variants
     - All variants return np.ndarray shape (num_sentences,)
     - All scores in [0.0, 1.0] range with higher = more hallucination
     - All variants show tqdm progress when verbose=True
@@ -360,7 +360,7 @@ Recommended implementation sequence:
 3. Task Group 3: Coherence Formula Implementations (requires Task Group 1) - COMPLETED
 
 **Phase 3: Detection Variants (Sequential)**
-4. Task Group 4: SelfCheck Coherence Variants (requires Task Groups 2 and 3)
+4. Task Group 4: SelfCheck Coherence Variants (requires Task Groups 2 and 3) - COMPLETED
 5. Task Group 5: Configuration Management (requires Task Groups 2-4)
 
 **Phase 4: Validation & Documentation (Sequential)**
@@ -396,7 +396,7 @@ Recommended implementation sequence:
 
 ### Dependencies and Blockers
 - Task Group 3 BLOCKED until theory formulas verified in Task Group 1 - UNBLOCKED (Task Group 1 complete)
-- Task Group 4 BLOCKED until both API client (Task Group 2) and formulas (Task Group 3) complete - UNBLOCKED (Task Groups 2 and 3 complete)
+- Task Group 4 BLOCKED until both API client (Task Group 2) and formulas (Task Group 3) complete - UNBLOCKED (Task Groups 2, 3, and 4 complete)
 - Task Group 6 BLOCKED until all variants implemented and minimally functional
 - No external blockers identified (all dependencies within codebase)
 
