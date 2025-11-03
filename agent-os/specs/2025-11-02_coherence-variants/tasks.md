@@ -248,38 +248,38 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 **Dependencies:** Task Groups 1-5 (all implementation complete)
 **Effort:** Medium (3-4 hours)
 
-- [ ] 6.0 Complete validation and evaluation infrastructure
-  - [ ] 6.1 Create `demo/coherence_demo.ipynb` Jupyter notebook for interactive testing
+- [x] 6.0 Complete validation and evaluation infrastructure
+  - [x] 6.1 Create `demo/coherence_demo.ipynb` Jupyter notebook for interactive testing
     - Import all three coherence variants
     - Create simple test examples with known properties (high/low coherence cases)
     - Manually inspect probability extraction for sanity
     - Visualize coherence scores vs hallucination scores for sample data
     - Test with small subset of wiki_bio_gpt3_hallucination dataset (5-10 passages)
-  - [ ] 6.2 Create `scripts/evaluate_coherence.py` standalone evaluation script
+  - [x] 6.2 Create `scripts/evaluate_coherence.py` standalone evaluation script
     - Load wiki_bio_gpt3_hallucination dataset using `datasets.load_dataset("potsawee/wiki_bio_gpt3_hallucination")['evaluation']`
     - Implement evaluation loop for all three coherence variants
     - Calculate AUC-PR using sklearn.metrics.average_precision_score
     - Calculate PCC (Pearson) using scipy.stats.pearsonr
     - Calculate AUC-ROC using sklearn.metrics.roc_auc_score
     - Support command-line arguments: --variant (shogenji/fitelson/olsson/all), --model, --num-samples
-  - [ ] 6.3 Implement results output and comparison
+  - [x] 6.3 Implement results output and comparison
     - Save results to JSON file: `results/coherence_evaluation_{timestamp}.json`
     - JSON structure: {variant_name: {auc_pr: float, pcc: float, auc_roc: float}}
     - Print comparison table showing all variants vs existing best (93.42 AUC-PR baseline)
     - Include cache statistics and estimated API costs in output
-  - [ ] 6.4 Create `demo/coherence_evaluation.ipynb` for visualization
+  - [x] 6.4 Create `demo/coherence_evaluation.ipynb` for visualization
     - Load evaluation results JSON
     - Plot ROC curves for all three variants
     - Plot Precision-Recall curves for all three variants
     - Plot hallucination score distributions (histograms)
     - Show per-sentence analysis for interesting cases (high/low coherence disagreements)
     - Compare against existing SelfCheckAPIPrompt baseline
-  - [ ] 6.5 Add cost estimation and logging
+  - [x] 6.5 Add cost estimation and logging
     - Log total API calls made during evaluation
     - Log cache hit rate and savings
     - Estimate total cost based on OpenAI API pricing (gpt-4o-mini pricing)
     - Print cost summary at end of evaluation
-  - [ ] 6.6 Run validation experiments
+  - [x] 6.6 Run validation experiments
     - Test each variant on small subset (10 passages) and inspect outputs manually
     - Verify coherence scores are in expected ranges
     - Verify hallucination scores correlate with ground truth labels
@@ -364,7 +364,7 @@ Recommended implementation sequence:
 5. Task Group 5: Configuration Management (requires Task Groups 2-4) - COMPLETED
 
 **Phase 4: Validation & Documentation (Sequential)**
-6. Task Group 6: Interactive Validation (requires Task Groups 1-5)
+6. Task Group 6: Interactive Validation (requires Task Groups 1-5) - COMPLETED
 7. Task Group 7: Documentation & Integration (requires Task Group 6)
 
 ---
@@ -397,7 +397,8 @@ Recommended implementation sequence:
 ### Dependencies and Blockers
 - Task Group 3 BLOCKED until theory formulas verified in Task Group 1 - UNBLOCKED (Task Group 1 complete)
 - Task Group 4 BLOCKED until both API client (Task Group 2) and formulas (Task Group 3) complete - UNBLOCKED (Task Groups 2, 3, and 4 complete)
-- Task Group 6 BLOCKED until all variants implemented and minimally functional
+- Task Group 6 BLOCKED until all variants implemented and minimally functional - UNBLOCKED (Task Groups 1-5 complete)
+- Task Group 7 BLOCKED until validation complete (Task Group 6) - READY TO START
 - No external blockers identified (all dependencies within codebase)
 
 ### Parallelization Opportunities
