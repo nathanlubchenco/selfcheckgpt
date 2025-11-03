@@ -13,6 +13,53 @@ class NLIConfig:
 class LLMPromptConfig:
     model: str = "meta-llama/Llama-2-7b-chat-hf"
 
+class CoherenceConfig:
+    """
+    Configuration class for coherence-based hallucination detection variants.
+
+    Provides default settings for OpenAI API-based probability extraction and
+    coherence measure calculations for SelfCheckShogenji, SelfCheckFitelson,
+    and SelfCheckOlsson variants.
+    """
+    # Default OpenAI model for probability extraction
+    model: str = "gpt-4o-mini"
+
+    # Prompt templates for probability extraction
+    individual_prob_template: str = "Rate the probability that this statement is true: {statement}"
+    joint_prob_template: str = "Rate the probability that both statements are true: {statement1} AND {statement2}"
+    conditional_prob_template: str = "Rate the probability that statement A is true: {statement1} GIVEN that {statement2} is true"
+
+    # JSON schema for structured output (ensures reliable probability extraction)
+    probability_json_schema: dict = {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "probability_response",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "probability": {
+                        "type": "number",
+                        "description": "A probability value between 0.0 and 1.0"
+                    }
+                },
+                "required": ["probability"],
+                "additionalProperties": False
+            }
+        }
+    }
+
+    # API configuration
+    max_tokens: int = 20  # Concise responses for cost minimization
+    temperature: float = 0.0  # Deterministic responses
+
+    # Numerical stability constants
+    normalization_epsilon: float = 1e-12  # Prevents division by zero in normalization
+    score_bounds: tuple = (0.0, 1.0)  # Output hallucination score range
+
+    # Cache configuration
+    max_cache_size: int = 10000  # Maximum cached prompt-response pairs
+
 # Question Generation & Answering Input Processing
 def prepare_qa_input(t5_tokenizer, context, device):
     """

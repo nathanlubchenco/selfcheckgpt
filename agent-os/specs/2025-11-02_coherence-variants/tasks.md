@@ -211,24 +211,24 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 **Dependencies:** Task Groups 2-4
 **Effort:** Small (1-2 hours)
 
-- [ ] 5.0 Complete configuration and constants
-  - [ ] 5.1 Add CoherenceConfig class to `selfcheckgpt/utils.py`
+- [x] 5.0 Complete configuration and constants
+  - [x] 5.1 Add CoherenceConfig class to `selfcheckgpt/utils.py`
     - Define default OpenAI model: "gpt-4o-mini"
     - Store JSON schema for structured probability output
     - Store epsilon constant: 1e-12
     - Store max_tokens for probability extraction: 20
     - Follow pattern of MQAGConfig and NLIConfig in utils.py
-  - [ ] 5.2 Add probability extraction prompt templates to CoherenceConfig
+  - [x] 5.2 Add probability extraction prompt templates to CoherenceConfig
     - individual_prob_template: "Rate the probability that this statement is true: {statement}"
     - joint_prob_template: "Rate the probability that both statements are true: {statement1} AND {statement2}"
     - conditional_prob_template: "Rate the probability that statement A is true: {statement1} GIVEN that {statement2} is true"
     - Store as class attributes for easy customization
     - Note: Structured output JSON schema handles format, not prompt text
-  - [ ] 5.3 Add numerical constants for score normalization
+  - [x] 5.3 Add numerical constants for score normalization
     - normalization_epsilon: 1e-12 (for preventing division by zero in normalization)
     - score_bounds: (0.0, 1.0) (output hallucination score range)
     - Note: No need for default_unparseable_prob due to structured output
-  - [ ] 5.4 Update module exports in `selfcheckgpt/__init__.py`
+  - [x] 5.4 Update module exports in `selfcheckgpt/__init__.py`
     - Add imports for SelfCheckShogenji, SelfCheckFitelson, SelfCheckOlsson
     - Add import for CoherenceAPIClient if exposing publicly
     - Maintain alphabetical ordering with existing exports
@@ -361,7 +361,7 @@ Recommended implementation sequence:
 
 **Phase 3: Detection Variants (Sequential)**
 4. Task Group 4: SelfCheck Coherence Variants (requires Task Groups 2 and 3) - COMPLETED
-5. Task Group 5: Configuration Management (requires Task Groups 2-4)
+5. Task Group 5: Configuration Management (requires Task Groups 2-4) - COMPLETED
 
 **Phase 4: Validation & Documentation (Sequential)**
 6. Task Group 6: Interactive Validation (requires Task Groups 1-5)
