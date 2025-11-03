@@ -96,37 +96,37 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 **Dependencies:** Task Group 1 (theory research)
 **Effort:** Medium (3-4 hours)
 
-- [ ] 3.0 Complete coherence formula implementations
-  - [ ] 3.1 Create `selfcheckgpt/utils_coherence.py` module
+- [x] 3.0 Complete coherence formula implementations
+  - [x] 3.1 Create `selfcheckgpt/utils_coherence.py` module
     - Import numpy and scipy as needed
     - Add module docstring explaining coherence measures
     - Include references to theory sources from Task 1.2
-  - [ ] 3.2 Implement Shogenji coherence measure
+  - [x] 3.2 Implement Shogenji coherence measure
     - Function signature: `coherence_shogenji(probs_individual: np.ndarray, probs_joint: np.ndarray, epsilon: float = 1e-12) -> np.ndarray`
     - Formula: C(A,B) = P(A ∧ B) / (P(A) × P(B))
     - Add epsilon smoothing to denominators to prevent division by zero
     - Input: probs_individual shape (n, 2) for [P(A), P(B)], probs_joint shape (n,) for P(A∧B)
     - Output: coherence scores shape (n,)
     - Add docstring with formula notation and references
-  - [ ] 3.3 Implement Fitelson confirmation measure
+  - [x] 3.3 Implement Fitelson confirmation measure
     - Function signature: `coherence_fitelson(probs_individual: np.ndarray, probs_joint: np.ndarray, probs_conditional: np.ndarray, epsilon: float = 1e-12) -> np.ndarray`
     - Formula: Based on difference between P(A|B) and P(A|¬B) (verify exact formula from Task 1.3)
     - Add epsilon smoothing for numerical stability
     - Input: probs_individual, probs_joint, probs_conditional arrays
     - Output: confirmation coherence scores
     - Add docstring with formula and theoretical motivation
-  - [ ] 3.4 Implement Olsson support-based measure
+  - [x] 3.4 Implement Olsson support-based measure
     - Function signature: `coherence_olsson(probs_individual: np.ndarray, probs_joint: np.ndarray, epsilon: float = 1e-12) -> np.ndarray`
     - Formula: Support-based measure analyzing mutual justification (verify from Task 1.3)
     - Add epsilon smoothing
     - Input/output matching other coherence functions
     - Add docstring with formula
-  - [ ] 3.5 Add numerical stability handling
+  - [x] 3.5 Add numerical stability handling
     - Implement epsilon=1e-12 smoothing consistently across all formulas
     - Clamp intermediate probability calculations to [epsilon, 1.0-epsilon] range
     - Handle edge cases: P=0, P=1, P(A∧B) > P(A) or P(B) (numerical errors)
     - Add assertions or warnings for physically impossible probabilities
-  - [ ] 3.6 Add utility function for score normalization
+  - [x] 3.6 Add utility function for score normalization
     - Function signature: `normalize_coherence_scores(scores: np.ndarray) -> np.ndarray`
     - Implement min-max normalization to [0.0, 1.0] range
     - Handle case where all scores are identical (return 0.5)
@@ -357,7 +357,7 @@ Recommended implementation sequence:
 2. Task Group 2: API Client Infrastructure (can run in parallel) - COMPLETED
 
 **Phase 2: Mathematical Implementation (Sequential)**
-3. Task Group 3: Coherence Formula Implementations (requires Task Group 1)
+3. Task Group 3: Coherence Formula Implementations (requires Task Group 1) - COMPLETED
 
 **Phase 3: Detection Variants (Sequential)**
 4. Task Group 4: SelfCheck Coherence Variants (requires Task Groups 2 and 3)
@@ -396,7 +396,7 @@ Recommended implementation sequence:
 
 ### Dependencies and Blockers
 - Task Group 3 BLOCKED until theory formulas verified in Task Group 1 - UNBLOCKED (Task Group 1 complete)
-- Task Group 4 BLOCKED until both API client (Task Group 2) and formulas (Task Group 3) complete
+- Task Group 4 BLOCKED until both API client (Task Group 2) and formulas (Task Group 3) complete - UNBLOCKED (Task Groups 2 and 3 complete)
 - Task Group 6 BLOCKED until all variants implemented and minimally functional
 - No external blockers identified (all dependencies within codebase)
 

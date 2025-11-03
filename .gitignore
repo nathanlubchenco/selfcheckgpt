@@ -3,3 +3,21 @@ selfcheckgpt.egg-info
 examples/
 dist/
 *.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+ENV/
+virtualenv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cython
+*.so
+*.c
+*.cpp
