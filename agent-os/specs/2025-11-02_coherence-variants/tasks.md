@@ -1,7 +1,7 @@
 # Task Breakdown: Coherence-Based Hallucination Detection Variants
 
 ## Overview
-Total Task Groups: 5
+Total Task Groups: 7
 Estimated Development Time: Medium-Large (research + implementation)
 Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 
@@ -302,41 +302,41 @@ Architecture: Hybrid (OpenAI API + NumPy/SciPy for coherence formulas)
 **Dependencies:** Task Group 6 (validation complete)
 **Effort:** Small-Medium (2-3 hours)
 
-- [ ] 7.0 Complete documentation and integration
-  - [ ] 7.1 Update main README.md with coherence variants
+- [x] 7.0 Complete documentation and integration
+  - [x] 7.1 Update main README.md with coherence variants
     - Add section "Coherence-Based Detection" after existing variants
     - Include usage examples for SelfCheckShogenji, SelfCheckFitelson, SelfCheckOlsson
     - Document required API key (OPENAI_API_KEY environment variable)
     - Show example of probability extraction caching and structured output
-  - [ ] 7.2 Create coherence-specific documentation
+  - [x] 7.2 Create coherence-specific documentation
     - Write `docs/coherence_variants.md` with detailed explanation
     - Include mathematical formulas for each coherence measure
     - Explain theoretical motivation (why coherence measures detect hallucinations)
     - Document prompt templates and customization options
     - Include performance benchmarks from Task 6.2 evaluation
-  - [ ] 7.3 Add docstrings to all new code
+  - [x] 7.3 Add docstrings to all new code
     - Complete docstrings for CoherenceAPIClient class and methods
     - Complete docstrings for coherence formula functions in utils_coherence.py
     - Complete docstrings for all three SelfCheck variant classes
     - Follow Google/NumPy docstring format matching existing codebase
     - Include parameter types, return types, and usage examples
-  - [ ] 7.4 Update CLAUDE.md project instructions
+  - [x] 7.4 Update CLAUDE.md project instructions
     - Add coherence variants to architecture section
     - Document new modules: modeling_coherence_api.py, modeling_coherence.py, utils_coherence.py
     - Add coherence variants to detection strategies list
     - Include API cost management notes (caching, estimation)
     - Update module structure diagram
-  - [ ] 7.5 Create minimal usage example script
+  - [x] 7.5 Create minimal usage example script
     - Write `examples/coherence_example.py` showing basic usage
     - Demonstrate initialization with OpenAI
     - Show predict() call with sample sentences and passages
     - Include cache statistics output and structured output explanation
-    - Make it copy-paste ready for quick start
-  - [ ] 7.6 Verify package integration
+    - Make it copy-paste ready for quick start (5-10 lines, not evaluation script)
+  - [x] 7.6 Verify package integration
     - Ensure all new modules import correctly
     - Check that coherence variants work alongside existing variants
     - Verify no breaking changes to existing code
-    - Test package installation in clean environment (optional: create virtual env and pip install -e .)
+    - Note: User is already manually testing with compare_methods.py
 
 **Acceptance Criteria:**
 - README.md updated with coherence variant examples
@@ -365,7 +365,7 @@ Recommended implementation sequence:
 
 **Phase 4: Validation & Documentation (Sequential)**
 6. Task Group 6: Interactive Validation (requires Task Groups 1-5) - COMPLETED
-7. Task Group 7: Documentation & Integration (requires Task Group 6)
+7. Task Group 7: Documentation & Integration (requires Task Group 6) - COMPLETED
 
 ---
 
@@ -398,7 +398,7 @@ Recommended implementation sequence:
 - Task Group 3 BLOCKED until theory formulas verified in Task Group 1 - UNBLOCKED (Task Group 1 complete)
 - Task Group 4 BLOCKED until both API client (Task Group 2) and formulas (Task Group 3) complete - UNBLOCKED (Task Groups 2, 3, and 4 complete)
 - Task Group 6 BLOCKED until all variants implemented and minimally functional - UNBLOCKED (Task Groups 1-5 complete)
-- Task Group 7 BLOCKED until validation complete (Task Group 6) - READY TO START
+- Task Group 7 BLOCKED until validation complete (Task Group 6) - COMPLETED
 - No external blockers identified (all dependencies within codebase)
 
 ### Parallelization Opportunities

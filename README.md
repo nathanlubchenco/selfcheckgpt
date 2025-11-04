@@ -5,7 +5,7 @@ SelfCheckGPT
 [![Downloads](https://pepy.tech/badge/selfcheckgpt)](https://pepy.tech/project/selfcheckgpt)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 - Project page for our paper "[SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection for Generative Large Language Models](https://arxiv.org/abs/2303.08896)"
-- We investigated several variants of the selfcheck approach: BERTScore, Question-Answering, n-gram, NLI, and LLM-Prompting. 
+- We investigated several variants of the selfcheck approach: BERTScore, Question-Answering, n-gram, NLI, and LLM-Prompting.
 - [Nov 2023] SelfCheckGPT-NLI Calibration Analysis thanks to Daniel Huynh [\[Link to Article\]](https://huggingface.co/blog/dhuynh95/automatic-hallucination-detection)
 - [Oct 2023] The paper is accepted and to appear at EMNLP 2023 [\[Poster\]](https://drive.google.com/file/d/1EzQ3MdmrF0gM-83UV2OQ6_QR1RuvhJ9h/view?usp=drive_link)
 - [Aug 2023] Slides from ML Collective Talk [\[Link to Slides\]](https://drive.google.com/file/d/13LUBPUm4y1nlKigZxXHn7Cl2lw5KuGbc/view)
@@ -51,7 +51,7 @@ sent_scores_mqag = selfcheck_mqag.predict(
     sentences = sentences,               # list of sentences
     passage = passage,                   # passage (before sentence-split)
     sampled_passages = [sample1, sample2, sample3], # list of sampled passages
-    num_questions_per_sent = 5,          # number of questions to be drawn  
+    num_questions_per_sent = 5,          # number of questions to be drawn
     scoring_method = 'bayes_with_alpha', # options = 'counting', 'bayes', 'bayes_with_alpha'
     beta1 = 0.8, beta2 = 0.8,            # additional params depending on scoring_method
 )
@@ -71,7 +71,7 @@ print(sent_scores_bertscore)
 # SelfCheck-Ngram: Score at sentence- and document-level where value is in [0.0, +inf) and high value means non-factual
 # as opposed to SelfCheck-MQAG and SelfCheck-BERTScore, SelfCheck-Ngram's score is not bounded
 sent_scores_ngram = selfcheck_ngram.predict(
-    sentences = sentences,   
+    sentences = sentences,
     passage = passage,
     sampled_passages = [sample1, sample2, sample3],
 )
@@ -116,7 +116,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 llm_model = "mistralai/Mistral-7B-Instruct-v0.2"
 selfcheck_prompt = SelfCheckLLMPrompt(llm_model, device)
 
-# Option2: API access 
+# Option2: API access
 # (currently only support OpenAI and Groq)
 # from selfcheckgpt.modeling_selfcheck_apiprompt import SelfCheckAPIPrompt
 # selfcheck_prompt = SelfCheckAPIPrompt(client_type="openai", model="gpt-3.5-turbo")
@@ -135,6 +135,100 @@ The LLM can be any model available on HuggingFace. The default prompt template i
 
 
 Most models (gpt-3.5-turbo, Llama2, Mistral) will output either 'Yes' or 'No' >95% of the time, while any remaining outputs can be set to N/A. The output is converted to score: Yes -> 0.0, No -> 1.0, N/A -> 0.5. The inconsistency score is then calculated by averaging.
+
+### SelfCheckGPT Usage: Coherence-Based Detection (NEW)
+
+We introduce three coherence-based hallucination detection variants that use formal probabilistic coherence theory from epistemology. These methods detect hallucinations by measuring logical coherence between LLM-generated statements and stochastically sampled passages using OpenAI's API for probability extraction.
+
+**Key Features:**
+- Based on formal coherence theory (Shogenji, Fitelson, Olsson)
+- Uses OpenAI's structured output for reliable probability extraction
+- Includes prompt-response caching to minimize API costs
+- Provides cache statistics and cost estimation utilities
+
+**Required:** Set `OPENAI_API_KEY` environment variable before use.
+
+```python
+import os
+os.environ['OPENAI_API_KEY'] = 'your-api-key-here'
+
+from selfcheckgpt.modeling_coherence import SelfCheckShogenji, SelfCheckFitelson, SelfCheckOlsson
+
+# Initialize coherence-based variants (all use OpenAI API)
+selfcheck_shogenji = SelfCheckShogenji(model="gpt-4o-mini")  # Ratio-based independence measure
+selfcheck_fitelson = SelfCheckFitelson(model="gpt-4o-mini")  # Confirmation-based support measure
+selfcheck_olsson = SelfCheckOlsson(model="gpt-4o-mini")      # Relative overlap measure
+
+# Use same sentence and sample data as above examples
+sentences = ["Michael Alan Weiner (born March 31, 1942) is an American radio host.",
+             "He is the host of The Savage Nation."]
+sampled_passages = [sample1, sample2, sample3]
+
+# --------------------------------------------------------------------------------------------------------------- #
+# SelfCheck-Shogenji: Uses Shogenji's ratio-based coherence measure C2(A,B) = P(A ∧ B) / (P(A) × P(B))
+# Score for each sentence in [0.0, 1.0] where high value means non-factual
+sent_scores_shogenji = selfcheck_shogenji.predict(
+    sentences = sentences,
+    sampled_passages = sampled_passages,
+    verbose = True  # Shows progress bar and cache statistics
+)
+print(sent_scores_shogenji)
+# [0.15, 0.72] -- example output
+
+# --------------------------------------------------------------------------------------------------------------- #
+# SelfCheck-Fitelson: Uses Fitelson's confirmation-based measure s(H,E) = P(H|E) - P(H|¬E)
+# Requires additional conditional probability extraction (more API calls)
+sent_scores_fitelson = selfcheck_fitelson.predict(
+    sentences = sentences,
+    sampled_passages = sampled_passages,
+    verbose = True
+)
+print(sent_scores_fitelson)
+# [0.18, 0.68] -- example output
+
+# --------------------------------------------------------------------------------------------------------------- #
+# SelfCheck-Olsson: Uses Glass-Olsson relative overlap C1(A,B) = P(A ∧ B) / P(A ∨ B)
+sent_scores_olsson = selfcheck_olsson.predict(
+    sentences = sentences,
+    sampled_passages = sampled_passages,
+    verbose = True
+)
+print(sent_scores_olsson)
+# [0.12, 0.75] -- example output
+```
+
+**Understanding Cache Statistics:**
+
+When `verbose=True`, coherence variants display cache statistics showing cost savings:
+
+```
+Cache statistics:
+  Hit rate: 45.00%
+  API calls made: 22
+  Cache size: 22
+```
+
+**API Cost Estimation:**
+
+Estimate API costs before running evaluation:
+
+```python
+from selfcheckgpt.modeling_coherence_api import CoherenceAPIClient
+
+# Estimate API calls needed
+cost_estimate = CoherenceAPIClient.estimate_api_calls(
+    num_sentences=10,
+    num_samples=5,
+    num_variants=1,  # For Shogenji or Olsson
+    include_conditional=False  # Set True for Fitelson variant
+)
+
+print(f"API calls per sentence: {cost_estimate['calls_per_sentence']}")
+print(f"Total calls (uncached): {cost_estimate['total_calls_uncached']}")
+print(f"Estimated calls (with caching): {cost_estimate['estimated_cached_calls']}")
+```
+
+For detailed theoretical background and advanced usage, see [docs/coherence_variants.md](docs/coherence_variants.md)
 
 ## Dataset
 The `wiki_bio_gpt3_hallucination` dataset currently consists of 238 annotated passages (`v3`). You can find more information in the paper or our data card on HuggingFace: https://huggingface.co/datasets/potsawee/wiki_bio_gpt3_hallucination. To use this dataset, you can either load it through HuggingFace dataset API, or download it directly from below in the JSON format.
