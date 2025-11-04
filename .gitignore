@@ -3,6 +3,7 @@ selfcheckgpt.egg-info
 examples/
 dist/
 *.ipynb_checkpoints/
+results/
 
 # Virtual environments
 venv/

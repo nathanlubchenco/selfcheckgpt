@@ -1,0 +1,23 @@
+# Core dependencies (from setup.py)
+transformers>=4.35
+torch>=1.12
+numpy
+bert_score
+spacy
+nltk
+openai
+groq
+
+# Coherence variant dependencies
+scipy>=1.7
+datasets
+scikit-learn
+
+# Visualization and demo dependencies
+matplotlib>=3.5
+seaborn>=0.12
+jupyter
+ipykernel
+
+# Development dependencies
+pytest>=7.0

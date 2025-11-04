@@ -105,14 +105,17 @@ def evaluate_variant(
 
         # Extract data
         sentences = passage_data['gpt3_sentences']
-        annotations = passage_data['annotation']  # 0=accurate, 1=inaccurate
+        annotations_text = passage_data['annotation']  # text labels
         gpt3_text = passage_data['gpt3_text']
 
-        # Create sampled passages (simplified: use GPT-3 text variations)
-        # In real scenario, these would be stochastic samples from LLM
-        # For evaluation purposes, we use the GPT-3 text multiple times
-        # This is a limitation but allows evaluation without regenerating samples
-        sampled_passages = [gpt3_text] * num_samples
+        # Convert text annotations to binary labels
+        # 'accurate' -> 0, 'minor_inaccurate'/'major_inaccurate' -> 1
+        annotations = [0 if ann == 'accurate' else 1 for ann in annotations_text]
+
+        # Use pre-generated stochastic samples from the dataset
+        all_samples = passage_data['gpt3_text_samples']  # 20 pre-generated samples
+        # Use the first num_samples from the available samples
+        sampled_passages = all_samples[:num_samples]
 
         # Predict hallucination scores
         try:
