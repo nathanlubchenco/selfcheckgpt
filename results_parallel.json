@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-11-04T16:25:32.529937",
+  "api_model": "gpt-4o-mini",
+  "device": "cpu",
+  "num_workers": 12,
+  "num_passages": 5,
+  "results": [
+    {
+      "method": "SelfCheckAPIPrompt",
+      "auc_pr": 0.9624377210540198,
+      "auc_roc": 0.8374999999999999,
+      "pcc": 0.5255944432724932,
+      "num_sentences": 45,
+      "num_accurate": 5,
+      "num_inaccurate": 40
+    },
+    {
+      "method": "SelfCheckShogenji",
+      "auc_pr": 0.9610509647897301,
+      "auc_roc": 0.725,
+      "pcc": 0.26310309199328674,
+      "num_sentences": 45,
+      "num_accurate": 5,
+      "num_inaccurate": 40,
+      "cache_stats": {
+        "hit_rate": 0.43360433604336046,
+        "cache_size": 1045,
+        "total_requests": 1845,
+        "api_calls": 1045
+      }
+    },
+    {
+      "method": "SelfCheckFitelson",
+      "auc_pr": 0.9646397612743246,
+      "auc_roc": 0.76,
+      "pcc": 0.26635169789643415,
+      "num_sentences": 45,
+      "num_accurate": 5,
+      "num_inaccurate": 40,
+      "cache_stats": {
+        "hit_rate": 0.29143897996357016,
+        "cache_size": 1945,
+        "total_requests": 2745,
+        "api_calls": 1945
+      }
+    },
+    {
+      "method": "SelfCheckOlsson",
+      "auc_pr": 0.9003943281207745,
+      "auc_roc": 0.6,
+      "pcc": 0.11252216994829423,
+      "num_sentences": 45,
+      "num_accurate": 5,
+      "num_inaccurate": 40,
+      "cache_stats": {
+        "hit_rate": 0.43360433604336046,
+        "cache_size": 1045,
+        "total_requests": 1845,
+        "api_calls": 1045
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-11-04T06:12:54.937445",
+  "model": "gpt-4o-mini",
+  "num_passages": 238,
+  "results": [
+    {
+      "method": "SelfCheckShogenji",
+      "auc_pr": 0.7931538277774606,
+      "auc_roc": 0.6285543638064689,
+      "pcc": 0.2029162882058771,
+      "num_sentences": 1908,
+      "num_accurate": 516,
+      "num_inaccurate": 1392,
+      "cache_stats": {
+        "hit_rate": 0.4304596819553101,
+        "cache_size": 10000,
+        "total_requests": 78228,
+        "api_calls": 44554
+      }
+    }
+  ]
+}

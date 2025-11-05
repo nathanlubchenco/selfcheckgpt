@@ -1,90 +1,214 @@
 # Evaluation Scripts
 
-Three scripts for evaluating SelfCheckGPT methods on the wiki_bio_gpt3_hallucination dataset.
+Unified evaluation script for all SelfCheckGPT methods with optional parallelization.
 
-## Scripts
-
-### 1. `simple_eval.py` - Evaluate Coherence Methods
-Evaluate the new coherence-based variants (Shogenji, Fitelson, Olsson).
+## Quick Start
 
 ```bash
+# View help and examples
+python scripts/evaluate.py --help
+
 # Quick test (10 passages)
-python scripts/simple_eval.py --variant shogenji --verbose
+python scripts/evaluate.py --methods shogenji --num-passages 10 --workers 4 --verbose
 
-# Test different variants
-python scripts/simple_eval.py --variant fitelson --num-passages 10
-python scripts/simple_eval.py --variant olsson --num-passages 10
+# Just baseline
+python scripts/evaluate.py --methods apiprompt --num-passages 238 --verbose
 
-# Full evaluation (238 passages) with gpt-4o-mini
-python scripts/simple_eval.py --variant shogenji --num-passages 238 --model gpt-4o-mini
+# Apples-to-apples comparison (all methods use gpt-4o-mini)
+python scripts/evaluate.py --methods apiprompt,shogenji,fitelson,olsson --num-passages 238 --workers 4 --verbose
 
-# Use different model
-python scripts/simple_eval.py --variant shogenji --model gpt-3.5-turbo
+# All methods (traditional + API + coherence)
+python scripts/evaluate.py --methods all --num-passages 238 --workers 4 --verbose
 ```
 
-**Options:**
-- `--variant`: shogenji, fitelson, or olsson (default: shogenji)
-- `--model`: OpenAI model name (default: gpt-4o-mini)
-- `--num-passages`: Number to evaluate (default: 10, max: 238)
-- `--verbose`: Show progress bars
+## Available Methods
 
-### 2. `eval_baseline.py` - Evaluate Baseline Method
-Evaluate the baseline SelfCheckAPIPrompt method for comparison.
+### Traditional Methods (Local Models, No API Cost)
+- **nli**: SelfCheckNLI using DeBERTa-v3-large
+- **mqag**: SelfCheckMQAG using T5 + Longformer
+- **bertscore**: SelfCheckBERTScore using RoBERTa
+- **ngram**: SelfCheckNgram (unigram model)
 
+### API-Based Methods
+- **apiprompt**: SelfCheckAPIPrompt (baseline from paper)
+
+### Coherence Methods (API-Based)
+- **shogenji**: Shogenji's coherence measure
+- **fitelson**: Fitelson's confirmation measure
+- **olsson**: Glass-Olsson overlap measure
+
+### Method Shortcuts
+- **all**: All methods (traditional + API + coherence)
+- **traditional**: Just traditional methods (nli, mqag, bertscore, ngram)
+- **api-only**: Just apiprompt
+- **coherence**: Just coherence methods (shogenji, fitelson, olsson)
+
+## Common Use Cases
+
+### 1. Reproduce Baseline Results
 ```bash
-# Quick test with gpt-4o-mini
-python scripts/eval_baseline.py --model gpt-4o-mini --num-passages 10 --verbose
-
-# Full evaluation (replicate baseline with gpt-3.5-turbo)
-python scripts/eval_baseline.py --model gpt-3.5-turbo --num-passages 238
+python scripts/evaluate.py \
+  --methods apiprompt \
+  --api-model gpt-4o-mini \
+  --num-passages 238 \
+  --verbose
 ```
 
-**Options:**
-- `--model`: OpenAI model name (default: gpt-4o-mini)
-- `--num-passages`: Number to evaluate (default: 10, max: 238)
-- `--verbose`: Show progress bars
-
-### 3. `compare_methods.py` - Side-by-Side Comparison
-Compare baseline and coherence methods with the same model.
-
+### 2. Compare Coherence Methods to Baseline
 ```bash
-# Compare all methods on 10 passages with gpt-4o-mini
-python scripts/compare_methods.py --model gpt-4o-mini --num-passages 10 --verbose
-
-# Full comparison (238 passages) - WARNING: expensive!
-python scripts/compare_methods.py --model gpt-4o-mini --num-passages 238
-
-# Compare only coherence methods
-python scripts/compare_methods.py --methods coherence-only --num-passages 10
-
-# Compare only baseline
-python scripts/compare_methods.py --methods baseline-only --num-passages 10
-
-# Save results to JSON
-python scripts/compare_methods.py --num-passages 10 --output results/comparison.json
+python scripts/evaluate.py \
+  --methods apiprompt,shogenji,fitelson,olsson \
+  --api-model gpt-4o-mini \
+  --num-passages 238 \
+  --workers 4 \
+  --verbose \
+  --output results.json
 ```
 
-**Options:**
-- `--model`: OpenAI model name (default: gpt-4o-mini)
-- `--num-passages`: Number to evaluate (default: 10, max: 238)
-- `--methods`: all, baseline-only, coherence-only, or comma-separated (default: all)
-- `--verbose`: Show progress bars
+### 3. Full Benchmark (All Methods)
+```bash
+python scripts/evaluate.py \
+  --methods all \
+  --num-passages 238 \
+  --workers 4 \
+  --verbose \
+  --output full_benchmark.json
+```
+
+### 4. Traditional Methods Only (No API Cost)
+```bash
+python scripts/evaluate.py \
+  --methods traditional \
+  --num-passages 238 \
+  --verbose \
+  --device cuda
+```
+
+### 5. Quick Development Test
+```bash
+python scripts/evaluate.py \
+  --methods shogenji \
+  --num-passages 10 \
+  --workers 4 \
+  --verbose
+```
+
+## Parameters
+
+### Required
+- `--methods`: Methods to evaluate (comma-separated or shortcut)
+
+### Optional
+- `--num-passages`: Number of passages (default: 238, use 10 for quick test)
+- `--api-model`: OpenAI model for API methods (default: gpt-4o-mini)
+- `--workers`: Parallel workers for API methods (default: 1, recommended: 4-8)
+- `--device`: Device for local models (default: auto, options: cuda/cpu)
 - `--output`: Save results to JSON file (optional)
+- `--verbose`: Show progress bars and detailed output
 
-## Example Workflow
+## Parallelization
 
+API-based methods (apiprompt, shogenji, fitelson, olsson) support parallelization:
+
+| Workers | Speedup | Time (238 passages) | Best For |
+|---------|---------|---------------------|----------|
+| 1 | 1x | ~39 hours | Baseline |
+| 4 | ~3.2x | **~12 hours** | **Recommended** |
+| 8 | ~4.5x | ~9 hours | Fast API tier |
+
+**Note:** Traditional methods always run sequentially (GPU memory constraints).
+
+### Example with Parallelization
 ```bash
-# 1. Quick test of one coherence variant
-python scripts/simple_eval.py --variant shogenji --num-passages 5 --verbose
+# 4 workers (3.2x speedup) - recommended
+python scripts/evaluate.py \
+  --methods coherence \
+  --num-passages 238 \
+  --workers 4 \
+  --verbose
 
-# 2. Quick test of baseline
-python scripts/eval_baseline.py --num-passages 5 --verbose
+# 8 workers (4.5x speedup) - requires tier 2+ API access
+python scripts/evaluate.py \
+  --methods coherence \
+  --num-passages 238 \
+  --workers 8 \
+  --verbose
+```
 
-# 3. Full comparison on small subset
-python scripts/compare_methods.py --num-passages 10 --verbose
+## Output Format
 
-# 4. Full evaluation (when ready)
-python scripts/compare_methods.py --num-passages 238 --output results/full_comparison.json
+### Console Output
+```
+================================================================================
+RESULTS (238 passages)
+================================================================================
+Method                         Type                 AUC-PR     AUC-ROC    PCC
+--------------------------------------------------------------------------------
+SelfCheckAPIPrompt             API (gpt-4o-mini)    0.9281     0.8573     0.5891
+SelfCheckShogenji              Coherence (...)      0.9649     0.8279     0.3609
+...
+
+Published Baselines (238 passages from EMNLP 2023 paper):
+  SelfCheckAPIPrompt (gpt-3.5-turbo): AUC-PR=93.42, AUC-ROC=67.09, PCC=78.32
+  SelfCheckNLI (DeBERTa):              AUC-PR=92.50, AUC-ROC=N/A,   PCC=74.14
+
+================================================================================
+CACHE STATISTICS (API Cost Reduction)
+================================================================================
+SelfCheckShogenji:
+  Cache hits: 1,580 / 3,649 (43.3%)
+  Actual API calls: 2,069
+  Cost savings: ~43%
+```
+
+### JSON Output (--output results.json)
+```json
+{
+  "timestamp": "2025-11-04T17:00:00",
+  "config": {
+    "api_model": "gpt-4o-mini",
+    "device": "cuda",
+    "num_workers": 4,
+    "num_passages": 238,
+    "methods": ["apiprompt", "shogenji"]
+  },
+  "results": [
+    {
+      "method": "SelfCheckAPIPrompt",
+      "auc_pr": 0.9281,
+      "auc_roc": 0.8573,
+      "pcc": 0.5891,
+      "num_sentences": 1908,
+      "num_accurate": 516,
+      "num_inaccurate": 1392
+    },
+    ...
+  ]
+}
+```
+
+## Tips
+
+1. **Start small**: Test with `--num-passages 10` before running full evaluation
+2. **Save results**: Always use `--output` to avoid losing long-running evaluations
+3. **Parallelization**: Use `--workers 4` for API methods (3.2x speedup)
+4. **API costs**: Coherence methods have ~40% cache hit rate, reducing costs significantly
+5. **GPU memory**: Traditional methods run sequentially to avoid GPU memory issues
+
+## Troubleshooting
+
+### "Rate limit exceeded"
+- Reduce `--workers` (try 2 instead of 4)
+- Check your OpenAI API tier at https://platform.openai.com/settings/organization/limits
+
+### Out of GPU memory
+- Use `--device cpu` for traditional methods
+- Close other GPU applications
+
+### Import errors
+```bash
+# Make sure you're in the venv and have installed the package
+pip install -e .
 ```
 
 ## Published Baseline (for reference)
@@ -104,3 +228,9 @@ The `wiki_bio_gpt3_hallucination` dataset includes:
 - 20 pre-generated stochastic samples per passage
 
 All scripts use the pre-generated samples for consistency with the published results.
+
+## See Also
+
+- Main docs: `README.md` (project root)
+- Coherence theory: `docs/coherence_variants.md`
+- Parallelization guide: `docs/parallelization_guide.md`
