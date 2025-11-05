@@ -14,9 +14,15 @@ class CoherenceAPIClient:
     Features:
     - Temperature=0.0 for deterministic probability extraction
     - OpenAI structured output (JSON schema) for reliable parsing
+    - Hybrid prompt strategy (axiom-aware + chain-of-thought) for improved calibration
     - Prompt-response caching to minimize API costs
     - Retry logic with exponential backoff for transient failures
     - Cache statistics and cost estimation utilities
+
+    The hybrid prompt strategy (default) combines:
+    - Chain-of-thought reasoning for better probability assessment
+    - Axiom awareness (probability theory constraints) for compliance
+    - Structured guidance on evidence evaluation and uncertainty
 
     Example:
         >>> client = CoherenceAPIClient(model="gpt-4o-mini")
@@ -73,10 +79,38 @@ class CoherenceAPIClient:
             }
         }
 
-        # Prompt templates for probability extraction
-        self.individual_prob_template = "Rate the probability that this statement is true: {statement}"
-        self.joint_prob_template = "Rate the probability that both statements are true: {statement1} AND {statement2}"
-        self.conditional_prob_template = "Rate the probability that statement A is true: {statement1} GIVEN that {statement2} is true"
+        # Prompt templates for probability extraction (using hybrid strategy)
+        # Hybrid strategy combines axiom awareness with chain-of-thought reasoning
+        # for improved calibration and coherence compliance
+        self.individual_prob_template = (
+            "Evaluate the probability that this statement is true: {statement}\n\n"
+            "Think carefully about:\n"
+            "1. Available evidence and common knowledge\n"
+            "2. Uncertainty and exceptions\n"
+            "3. Logical consistency\n\n"
+            "Remember: Use 0.0 for impossible, 1.0 for certain, and values in between for uncertain claims. "
+            "What is the probability?"
+        )
+        self.joint_prob_template = (
+            "Evaluate the probability that BOTH statements are simultaneously true:\n"
+            "Statement 1: {statement1}\n"
+            "Statement 2: {statement2}\n\n"
+            "Consider:\n"
+            "1. Are these statements independent or related?\n"
+            "2. Does one imply or contradict the other?\n"
+            "3. P(A∧B) must be ≤ min(P(A), P(B))\n\n"
+            "What is the joint probability?"
+        )
+        self.conditional_prob_template = (
+            "Evaluate the conditional probability P(A|B):\n"
+            "A: {statement1}\n"
+            "B (given condition): {statement2}\n\n"
+            "Think about:\n"
+            "1. How does knowing B affects the likelihood of A?\n"
+            "2. Is there a causal or logical relationship?\n"
+            "3. P(A|B) = P(A∧B) / P(B)\n\n"
+            "What is P(A|B)?"
+        )
 
         print(f"Initiate OpenAI client for coherence detection... model = {model}")
 

@@ -321,16 +321,45 @@ The `CoherenceAPIClient` implements automatic caching to minimize API costs:
 
 ## Advanced Configuration
 
+### Probability Extraction Prompt Strategy
+
+**Default: Hybrid Prompt Strategy (Recommended)**
+
+As of version 0.1.7+, coherence variants use an optimized **hybrid prompt strategy** that combines:
+- **Chain-of-thought reasoning** - Guides the model to think step-by-step about evidence
+- **Axiom awareness** - Includes probability theory constraints to reduce violations
+- **Structured evaluation** - Provides clear criteria for assessing uncertainty
+
+**Why hybrid prompts?**
+Benchmark testing showed the hybrid strategy delivers:
+- 20% better Brier score (calibration quality)
+- 33% better Expected Calibration Error
+- 100% probability axiom compliance
+- More decisive predictions (higher sharpness)
+
+**Example hybrid prompt for individual probability:**
+```
+Evaluate the probability that this statement is true: [statement]
+
+Think carefully about:
+1. Available evidence and common knowledge
+2. Uncertainty and exceptions
+3. Logical consistency
+
+Remember: Use 0.0 for impossible, 1.0 for certain, and values in between for uncertain claims.
+What is the probability?
+```
+
 ### Custom Prompt Templates
 
-You can customize probability extraction prompts:
+You can customize probability extraction prompts if needed:
 
 ```python
 from selfcheckgpt.modeling_coherence_api import CoherenceAPIClient
 
 client = CoherenceAPIClient(model="gpt-4o-mini")
 
-# Customize prompt templates
+# Customize prompt templates (overrides hybrid default)
 client.individual_prob_template = "Estimate P(true): {statement}"
 client.joint_prob_template = "Estimate P({statement1} AND {statement2})"
 
@@ -339,6 +368,8 @@ from selfcheckgpt.modeling_coherence import SelfCheckShogenji
 selfcheck = SelfCheckShogenji(model="gpt-4o-mini")
 selfcheck.client = client  # Replace default client
 ```
+
+**Note:** Custom prompts may not perform as well as the optimized hybrid strategy. We recommend using the defaults unless you have specific requirements.
 
 ### Using Different OpenAI Models
 
