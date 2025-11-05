@@ -10,7 +10,7 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
 1. Benchmark creation FIRST (blocks all other work) ✓ COMPLETED
 2. Prompt improvements SECOND (highest priority after benchmark)
 3. Verification THIRD (parallel with prompts) ✓ COMPLETED
-4. Dataset investigation FOURTH (parallel with verification)
+4. Dataset investigation FOURTH (parallel with verification) ✓ COMPLETED
 5. Integration FINAL (depends on all previous phases)
 
 ## Task List
@@ -279,43 +279,66 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
 
 ---
 
-### Phase 4: Dataset Investigation (Medium Priority - Parallel with Phases 2-3)
+### Phase 4: Dataset Investigation (Medium Priority - Parallel with Phases 2-3) ✓ COMPLETED
 
-#### Task Group 4.1: SimpleQA Dataset Analysis
+#### Task Group 4.1: SimpleQA Dataset Analysis ✓ COMPLETED
 **Dependencies:** None (independent research task)
 
-- [ ] 4.1.0 Investigate SimpleQA dataset compatibility
-  - [ ] 4.1.1 Research SimpleQA dataset structure
-  - [ ] 4.1.2 Analyze SimpleQA compatibility requirements
-  - [ ] 4.1.3 Assess data availability and licensing
-  - [ ] 4.1.4 Create compatibility assessment report
+- [x] 4.1.0 Investigate SimpleQA dataset compatibility
+  - [x] 4.1.1 Research SimpleQA dataset structure
+  - [x] 4.1.2 Analyze SimpleQA compatibility requirements
+  - [x] 4.1.3 Assess data availability and licensing
+  - [x] 4.1.4 Create compatibility assessment report
 
-**Acceptance Criteria:**
-- Comprehensive understanding of SimpleQA dataset structure
-- Clear determination of compatibility (yes/no with rationale)
-- Documentation of adaptation requirements if compatible
-- Alternative dataset recommendations if incompatible
+**Acceptance Criteria:** ✓ ALL MET
+- ✓ Comprehensive understanding of SimpleQA dataset structure
+- ✓ Clear determination of compatibility: INCOMPATIBLE
+- ✓ Documentation of alternative dataset recommendations (HaluEval)
+- ✓ Detailed rationale for incompatibility documented
+
+**Implementation:** `/Users/nathanlubchenco/workspace/selfcheckgpt/agent-os/specs/2025-11-03-coherence-improvements/planning/simpleqa-compatibility-report.md`
+
+**Key Findings:**
+- **Dataset Structure:** 4,326 questions with ground truth answers only
+- **Format:** Parquet/CSV with fields: metadata, problem, answer, split
+- **License:** MIT (publicly available via HuggingFace)
+- **Compatibility Determination:** INCOMPATIBLE
+
+**Critical Blockers:**
+1. No LLM-generated responses (only ground truth answers)
+2. No multiple stochastic samples per question
+3. Short-form answers (1-10 words) unsuitable for sentence-level coherence analysis
+4. Fundamental mismatch with coherence approach (requires multi-sentence responses)
+
+**Recommendation:** Maintain wiki_bio_gpt3_hallucination as sole evaluation dataset. SimpleQA's short-form factuality focus directly conflicts with coherence method requirements.
+
+**Alternative Datasets Considered:**
+- HaluEval (partial compatibility - better than SimpleQA but still requires sample generation)
+- TruthfulQA (incompatible - same issues as SimpleQA)
+- Custom dataset creation (future work)
 
 ---
 
 #### Task Group 4.2: SimpleQA Integration (Conditional on 4.1 Compatibility)
 **Dependencies:** Task Groups 4.1 (compatibility confirmed), 1.3 (benchmark runner exists)
 
-- [ ] 4.2.0 Integrate SimpleQA as secondary evaluation dataset (ONLY IF COMPATIBLE)
-  - [ ] 4.2.1 Create SimpleQA data loader
-  - [ ] 4.2.2 Generate stochastic samples for SimpleQA
-  - [ ] 4.2.3 Create ground truth hallucination labels
-  - [ ] 4.2.4 Adapt evaluation script for SimpleQA
-  - [ ] 4.2.5 Run baseline coherence evaluation on SimpleQA
+**STATUS: SKIPPED** - Task Group 4.1 determined SimpleQA is INCOMPATIBLE
 
-**Acceptance Criteria:**
-- SimpleQA dataset loaded and formatted for coherence analysis
-- Stochastic samples generated or validated
-- Ground truth hallucination labels created
-- Evaluation script runs successfully on SimpleQA
-- Baseline performance metrics documented
+- [N/A] 4.2.0 Integrate SimpleQA as secondary evaluation dataset (ONLY IF COMPATIBLE)
+  - [N/A] 4.2.1 Create SimpleQA data loader
+  - [N/A] 4.2.2 Generate stochastic samples for SimpleQA
+  - [N/A] 4.2.3 Create ground truth hallucination labels
+  - [N/A] 4.2.4 Adapt evaluation script for SimpleQA
+  - [N/A] 4.2.5 Run baseline coherence evaluation on SimpleQA
 
-**Note:** This task group is conditional on Task 4.1 determining SimpleQA is compatible.
+**Note:** This task group was conditional on Task 4.1 determining SimpleQA is compatible. Since SimpleQA is INCOMPATIBLE, this task group is not applicable.
+
+**Phase 4 Summary:**
+- SimpleQA dataset thoroughly researched and analyzed
+- Compatibility assessment completed with detailed rationale
+- Decision: Do NOT integrate SimpleQA (incompatible with coherence approach)
+- Focus remains on wiki_bio_gpt3_hallucination as sole evaluation dataset
+- Alternative datasets documented for potential future expansion
 
 ---
 
@@ -348,14 +371,14 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
   - [ ] 5.2.1 Run improved Shogenji on wiki_bio_gpt3_hallucination
   - [ ] 5.2.2 Run improved Fitelson on wiki_bio_gpt3_hallucination
   - [ ] 5.2.3 Run improved Olsson on wiki_bio_gpt3_hallucination
-  - [ ] 5.2.4 Run on SimpleQA if compatible (conditional)
+  - [N/A] 5.2.4 Run on SimpleQA if compatible (SKIPPED - incompatible)
   - [ ] 5.2.5 Create comprehensive improvement report
   - [ ] 5.2.6 Document known limitations and failure modes
 
 **Acceptance Criteria:**
 - All three coherence variants evaluated on wiki_bio with improved prompts
 - Quantified improvement vs baseline (target: >10% Brier score reduction)
-- SimpleQA evaluation completed if compatible
+- SimpleQA evaluation skipped (determined incompatible in Phase 4)
 - Comprehensive improvement report created
 - Known limitations documented
 
@@ -398,9 +421,9 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
 3. **Phase 3: Verification** (Task Groups 3.1 → 3.2) ✓ COMPLETED
    - Can run in parallel with Phase 2 after Phase 1 completes
 
-4. **Phase 4: Dataset Investigation** (Task Groups 4.1 → 4.2)
-   - Task 4.1 can run anytime (no dependencies)
-   - Task 4.2 depends on 4.1 and is conditional
+4. **Phase 4: Dataset Investigation** (Task Groups 4.1 → 4.2) ✓ COMPLETED
+   - Task 4.1 completed (SimpleQA determined incompatible)
+   - Task 4.2 skipped (conditional on 4.1 compatibility)
 
 **Final Integration:**
 5. **Phase 5: Production Integration** (Task Groups 5.1 → 5.2 → 5.3)
@@ -426,10 +449,10 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
 - ✓ Verify no regressions in existing functionality
 - ✓ Total: 48 tests passed (30 unit + 18 integration)
 
-**Phase 4 Testing:**
-- If SimpleQA compatible: validate data loading and evaluation scripts
-- Test stochastic sample generation quality
-- Verify metrics calculate correctly on new dataset
+**Phase 4 Testing:** ✓ COMPLETED
+- ✓ SimpleQA compatibility assessed (incompatible)
+- ✓ No data loading or evaluation scripts needed (skipped)
+- ✓ Comprehensive compatibility report created
 
 **Phase 5 Testing:**
 - Regression testing: ensure backward compatibility maintained
@@ -440,7 +463,7 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
 - Phase 1: ✓ Benchmark infrastructure validated
 - Phase 2: 5 prompt variants × 40 test cases = 200 benchmark executions
 - Phase 3: ✓ 48 tests (30 unit + 18 integration) - ALL PASSED
-- Phase 4: Dataset-specific tests (if applicable)
+- Phase 4: ✓ Compatibility analysis completed (no tests needed)
 - Phase 5: End-to-end validation + regression suite
 
 ## Implementation Notes
@@ -470,6 +493,9 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
 - Test init: `/Users/nathanlubchenco/workspace/selfcheckgpt/tests/__init__.py`
 - Test config: `/Users/nathanlubchenco/workspace/selfcheckgpt/pytest.ini`
 - Test documentation: `/Users/nathanlubchenco/workspace/selfcheckgpt/tests/README.md`
+
+**Phase 4:**
+- Compatibility report: `/Users/nathanlubchenco/workspace/selfcheckgpt/agent-os/specs/2025-11-03-coherence-improvements/planning/simpleqa-compatibility-report.md`
 
 **Key Files to Reference:**
 - Coherence variants: `/Users/nathanlubchenco/workspace/selfcheckgpt/selfcheckgpt/modeling_coherence.py`
@@ -532,7 +558,41 @@ pytest tests/test_coherence_formulas.py::TestShogenjiFormula::test_independent_e
 - Error handling: ✓ Long sentences, unicode, empty inputs handled gracefully
 - Cost estimation: ✓ API call estimation accurate
 
-**Next Steps (Phase 2 or Phase 4):**
-The verification infrastructure is now complete. The project can proceed with:
+## Phase 4 Completion Summary
+
+**What Was Investigated:**
+
+1. **SimpleQA Dataset Research**
+   - Official sources: HuggingFace datasets (lighteval/SimpleQA, basicv8vc/SimpleQA, google/simpleqa-verified)
+   - GitHub repository: openai/simple-evals
+   - Dataset size: 4,326 examples (4,320 test + 6 few_shot)
+   - Format: Parquet/CSV with metadata, problem, answer, split fields
+   - License: MIT (publicly accessible)
+
+2. **Compatibility Analysis Against Requirements**
+   - **Requirement 1 (LLM Responses):** NOT MET - Only ground truth answers, no LLM-generated responses
+   - **Requirement 2 (Stochastic Samples):** NOT MET - Single ground truth per question, no samples
+   - **Requirement 3 (Sentence Structure):** NOT MET - Short-form answers (1-10 words)
+   - **Requirement 4 (Multi-Sentence):** NOT MET - Fundamental mismatch with coherence approach
+
+3. **Compatibility Determination**
+   - **Final Assessment:** INCOMPATIBLE
+   - **Critical Blockers:** 3 (missing responses, missing samples, insufficient length)
+   - **Major Blockers:** 1 (single-word answers)
+   - **Adaptation Cost:** $6,500+ (mostly labor) with questionable scientific value
+
+4. **Alternative Datasets Evaluated**
+   - **HaluEval:** Partial compatibility (has hallucinated responses but missing samples)
+   - **TruthfulQA:** Incompatible (same issues as SimpleQA)
+   - **FEVER:** Incompatible (different task - claim verification)
+   - **Custom Dataset:** Recommended for future if expansion needed
+
+**Recommendation:**
+- Maintain wiki_bio_gpt3_hallucination as sole evaluation dataset
+- SimpleQA's short-form factuality focus directly conflicts with coherence requirements
+- Document dataset requirements for future evaluation opportunities
+
+**Next Steps (Phase 2):**
+The dataset investigation is now complete. The project can proceed with:
 - **Phase 2**: Prompt optimization work (baseline evaluation, CoT, few-shot, axiom-aware, hybrid)
-- **Phase 4**: SimpleQA dataset investigation (can run in parallel with Phase 2)
+- All validation in Phase 5 will focus solely on wiki_bio_gpt3_hallucination
