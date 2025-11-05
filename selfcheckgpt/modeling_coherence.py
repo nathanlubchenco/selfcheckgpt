@@ -146,11 +146,20 @@ class SelfCheckShogenji:
         # Aggregate coherence across samples (mean)
         mean_coherence = coherence_matrix.mean(axis=-1)
 
-        # Normalize to [0, 1] range using min-max normalization
-        normalized_coherence = normalize_coherence_scores(mean_coherence)
-
-        # Invert to hallucination scores: high coherence -> low hallucination
-        hallucination_scores = 1.0 - normalized_coherence
+        # Convert coherence to hallucination scores
+        # For single sentence: use direct mapping (C2 ∈ [0, ∞) → hallucination ∈ [0, 1])
+        # For multiple sentences: use min-max normalization for relative scoring
+        if len(mean_coherence) == 1:
+            # Single sentence: use improved Shogenji mapping
+            # Formula: hallucination = exp(-C2)
+            # This maps: C2=0 → 1.0, C2=1 → 0.37, C2=2 → 0.14, C2→∞ → 0.0
+            # Exponential decay provides better discrimination for C2 near 1.0
+            hallucination_scores = np.exp(-mean_coherence)
+        else:
+            # Multiple sentences: normalize to [0, 1] range using min-max normalization
+            normalized_coherence = normalize_coherence_scores(mean_coherence)
+            # Invert to hallucination scores: high coherence -> low hallucination
+            hallucination_scores = 1.0 - normalized_coherence
 
         if verbose:
             cache_stats = self.client.get_cache_stats()
@@ -276,14 +285,22 @@ class SelfCheckFitelson:
         # Aggregate support across samples (mean)
         mean_support = support_matrix.mean(axis=-1)
 
-        # Normalize to [0, 1] range
-        # Fitelson support is in [-1, 1], so we map: (support + 1) / 2
-        normalized_support = (mean_support + 1.0) / 2.0
-        # Apply min-max normalization for consistency
-        normalized_support = normalize_coherence_scores(normalized_support)
-
-        # Invert to hallucination scores: high support -> low hallucination
-        hallucination_scores = 1.0 - normalized_support
+        # Convert support to hallucination scores
+        # For single sentence: use direct mapping (s ∈ [-1, 1] → hallucination ∈ [0, 1])
+        # For multiple sentences: use min-max normalization for relative scoring
+        if len(mean_support) == 1:
+            # Single sentence: use direct Fitelson mapping
+            # Formula: hallucination = (1 - s) / 2
+            # This maps: s=-1 → 1.0, s=0 → 0.5, s=+1 → 0.0
+            hallucination_scores = (1.0 - mean_support) / 2.0
+        else:
+            # Multiple sentences: normalize to [0, 1] range
+            # Fitelson support is in [-1, 1], so we map: (support + 1) / 2
+            normalized_support = (mean_support + 1.0) / 2.0
+            # Apply min-max normalization for consistency
+            normalized_support = normalize_coherence_scores(normalized_support)
+            # Invert to hallucination scores: high support -> low hallucination
+            hallucination_scores = 1.0 - normalized_support
 
         if verbose:
             cache_stats = self.client.get_cache_stats()
@@ -403,12 +420,20 @@ class SelfCheckOlsson:
         # Aggregate coherence across samples (mean)
         mean_coherence = coherence_matrix.mean(axis=-1)
 
-        # Normalize to [0, 1] range using min-max normalization
-        # Glass-Olsson is already in [0,1], but we apply normalization for consistency
-        normalized_coherence = normalize_coherence_scores(mean_coherence)
-
-        # Invert to hallucination scores: high coherence -> low hallucination
-        hallucination_scores = 1.0 - normalized_coherence
+        # Convert coherence to hallucination scores
+        # For single sentence: use direct mapping (C1 ∈ [0, 1] → hallucination ∈ [0, 1])
+        # For multiple sentences: use min-max normalization for relative scoring
+        if len(mean_coherence) == 1:
+            # Single sentence: use direct Olsson mapping
+            # Formula: hallucination = 1 - C1
+            # This maps: C1=0 → 1.0, C1=0.5 → 0.5, C1=1 → 0.0
+            hallucination_scores = 1.0 - mean_coherence
+        else:
+            # Multiple sentences: normalize to [0, 1] range using min-max normalization
+            # Glass-Olsson is already in [0,1], but we apply normalization for consistency
+            normalized_coherence = normalize_coherence_scores(mean_coherence)
+            # Invert to hallucination scores: high coherence -> low hallucination
+            hallucination_scores = 1.0 - normalized_coherence
 
         if verbose:
             cache_stats = self.client.get_cache_stats()

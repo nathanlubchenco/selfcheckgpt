@@ -392,15 +392,29 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
   - [ ] 5.3.2 Update coherence_variants.md documentation
   - [ ] 5.3.3 Create probability extraction methodology guide
   - [ ] 5.3.4 Document benchmark usage and extension
-  - [ ] 5.3.5 Create demo notebook for benchmark exploration
+  - [x] 5.3.5 Create educational demo notebook (understanding_coherence.ipynb)
   - [ ] 5.3.6 Update CHANGELOG or release notes
 
 **Acceptance Criteria:**
 - All documentation updated to reflect improvements
 - Benchmark methodology thoroughly documented
-- Demo notebook created for interactive exploration
+- ✓ Educational demo notebook created for building coherence intuition
 - Clear guidance provided for users on prompt selection
 - Release notes prepared
+
+**Implementation (Task 5.3.5):**
+- Educational notebook: `/Users/nathanlubchenco/workspace/selfcheckgpt/demo/understanding_coherence.ipynb`
+- Comprehensive 11-section tutorial covering:
+  - Quick start and basic usage
+  - Simplified math explanations with visualizations
+  - Success stories from wiki_bio dataset (6-10 concrete examples)
+  - Failure modes and edge cases
+  - Comparative analysis vs. baselines
+  - Performance visualizations (distributions, ROC curves, PR curves)
+  - Score interpretation guide
+  - Best practices and recommendations
+  - Interactive "try it yourself" section
+  - Complete documentation with examples
 
 ---
 
@@ -496,6 +510,9 @@ Implementation Strategy: Sequential phases with some parallel work opportunities
 
 **Phase 4:**
 - Compatibility report: `/Users/nathanlubchenco/workspace/selfcheckgpt/agent-os/specs/2025-11-03-coherence-improvements/planning/simpleqa-compatibility-report.md`
+
+**Phase 5 (Partial):**
+- Educational notebook: `/Users/nathanlubchenco/workspace/selfcheckgpt/demo/understanding_coherence.ipynb`
 
 **Key Files to Reference:**
 - Coherence variants: `/Users/nathanlubchenco/workspace/selfcheckgpt/selfcheckgpt/modeling_coherence.py`
