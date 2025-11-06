@@ -36,8 +36,10 @@ class SelfCheckAPIPrompt:
 
     def completion(self, prompt: str):
         if self.client_type == "openai" or self.client_type == "groq":
-            # GPT-5 and o1 models use max_completion_tokens instead of max_tokens
+            # GPT-5 and o1 models have different parameter requirements
             uses_completion_tokens = self.model.startswith(('gpt-5', 'o1'))
+            # GPT-5 models don't support temperature=0.0, only default (1.0)
+            supports_zero_temp = not self.model.startswith('gpt-5')
 
             completion_params = {
                 "model": self.model,
@@ -45,9 +47,13 @@ class SelfCheckAPIPrompt:
                     # {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ],
-                "temperature": 0.0,  # 0.0 = deterministic
             }
 
+            # Only set temperature if model supports it
+            if supports_zero_temp:
+                completion_params["temperature"] = 0.0  # 0.0 = deterministic
+
+            # Use appropriate token parameter
             if uses_completion_tokens:
                 completion_params["max_completion_tokens"] = 5
             else:

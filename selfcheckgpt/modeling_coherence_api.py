@@ -185,18 +185,24 @@ class CoherenceAPIClient:
         self._cache_misses += 1
 
         # Make API call with structured output
-        # GPT-5 and o1 models use max_completion_tokens instead of max_tokens
+        # GPT-5 and o1 models have different parameter requirements
         uses_completion_tokens = self.model.startswith(('gpt-5', 'o1'))
+        # GPT-5 models don't support temperature=0.0, only default (1.0)
+        supports_zero_temp = not self.model.startswith('gpt-5')
 
         completion_params = {
             "model": self.model,
             "messages": [
                 {"role": "user", "content": prompt}
             ],
-            "temperature": 0.0,  # Deterministic responses
             "response_format": self._probability_schema
         }
 
+        # Only set temperature if model supports it
+        if supports_zero_temp:
+            completion_params["temperature"] = 0.0  # Deterministic responses
+
+        # Use appropriate token parameter
         if uses_completion_tokens:
             completion_params["max_completion_tokens"] = 20
         else:
