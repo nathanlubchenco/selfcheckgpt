@@ -36,15 +36,24 @@ class SelfCheckAPIPrompt:
 
     def completion(self, prompt: str):
         if self.client_type == "openai" or self.client_type == "groq":
-            chat_completion = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            # GPT-5 and o1 models use max_completion_tokens instead of max_tokens
+            uses_completion_tokens = self.model.startswith(('gpt-5', 'o1'))
+
+            completion_params = {
+                "model": self.model,
+                "messages": [
                     # {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.0, # 0.0 = deterministic,
-                max_tokens=5, # max_tokens is the generated one,
-            )
+                "temperature": 0.0,  # 0.0 = deterministic
+            }
+
+            if uses_completion_tokens:
+                completion_params["max_completion_tokens"] = 5
+            else:
+                completion_params["max_tokens"] = 5  # max_tokens is the generated one
+
+            chat_completion = self.client.chat.completions.create(**completion_params)
             return chat_completion.choices[0].message.content
 
         else:

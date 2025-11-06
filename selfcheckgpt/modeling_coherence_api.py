@@ -185,15 +185,24 @@ class CoherenceAPIClient:
         self._cache_misses += 1
 
         # Make API call with structured output
-        chat_completion = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
+        # GPT-5 and o1 models use max_completion_tokens instead of max_tokens
+        uses_completion_tokens = self.model.startswith(('gpt-5', 'o1'))
+
+        completion_params = {
+            "model": self.model,
+            "messages": [
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.0,  # Deterministic responses
-            max_tokens=20,    # Concise responses
-            response_format=self._probability_schema
-        )
+            "temperature": 0.0,  # Deterministic responses
+            "response_format": self._probability_schema
+        }
+
+        if uses_completion_tokens:
+            completion_params["max_completion_tokens"] = 20
+        else:
+            completion_params["max_tokens"] = 20  # Concise responses
+
+        chat_completion = self.client.chat.completions.create(**completion_params)
 
         # Parse JSON response
         response_text = chat_completion.choices[0].message.content
