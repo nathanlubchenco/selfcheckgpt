@@ -36,7 +36,7 @@ from selfcheckgpt.modeling_selfcheck_apiprompt import SelfCheckAPIPrompt
 from selfcheckgpt import SelfCheckShogenji, SelfCheckFitelson, SelfCheckOlsson
 
 
-def evaluate_single_passage(idx, dataset, variant, needs_passage=False):
+def evaluate_single_passage(idx, dataset, variant, needs_passage=False, supports_verbose=False, predict_kwargs=None):
     """Evaluate a single passage - used for parallel processing."""
     passage = dataset[idx]
 
@@ -45,20 +45,41 @@ def evaluate_single_passage(idx, dataset, variant, needs_passage=False):
     annotations = passage['annotation']
     labels = [0 if ann == 'accurate' else 1 for ann in annotations]
 
+    # Merge default predict_kwargs
+    if predict_kwargs is None:
+        predict_kwargs = {}
+
     if needs_passage:
         passage_text = ' '.join(sentences)
-        scores = variant.predict(
-            sentences=sentences,
-            passage=passage_text,
-            sampled_passages=sampled_passages,
-            verbose=False
-        )
+        if supports_verbose:
+            scores = variant.predict(
+                sentences=sentences,
+                passage=passage_text,
+                sampled_passages=sampled_passages,
+                verbose=False,
+                **predict_kwargs
+            )
+        else:
+            scores = variant.predict(
+                sentences=sentences,
+                passage=passage_text,
+                sampled_passages=sampled_passages,
+                **predict_kwargs
+            )
     else:
-        scores = variant.predict(
-            sentences=sentences,
-            sampled_passages=sampled_passages,
-            verbose=False
-        )
+        if supports_verbose:
+            scores = variant.predict(
+                sentences=sentences,
+                sampled_passages=sampled_passages,
+                verbose=False,
+                **predict_kwargs
+            )
+        else:
+            scores = variant.predict(
+                sentences=sentences,
+                sampled_passages=sampled_passages,
+                **predict_kwargs
+            )
 
     return {
         'idx': idx,
@@ -68,7 +89,7 @@ def evaluate_single_passage(idx, dataset, variant, needs_passage=False):
 
 
 def evaluate_method(method_name, variant, dataset, num_passages, num_workers=1,
-                   verbose=False, needs_passage=False):
+                   verbose=False, needs_passage=False, supports_verbose=False, predict_kwargs=None):
     """
     Evaluate a method with optional parallelization.
 
@@ -80,6 +101,8 @@ def evaluate_method(method_name, variant, dataset, num_passages, num_workers=1,
         num_workers: Number of parallel workers (1 = sequential)
         verbose: Show progress bars
         needs_passage: Whether method needs full passage text
+        supports_verbose: Whether method's predict() accepts verbose parameter
+        predict_kwargs: Additional kwargs to pass to variant.predict()
     """
     all_scores = []
     all_labels = []
@@ -88,7 +111,8 @@ def evaluate_method(method_name, variant, dataset, num_passages, num_workers=1,
     is_api_based = any(x in method_name for x in ['API', 'Shogenji', 'Fitelson', 'Olsson'])
 
     eval_func = partial(evaluate_single_passage, dataset=dataset,
-                       variant=variant, needs_passage=needs_passage)
+                       variant=variant, needs_passage=needs_passage, supports_verbose=supports_verbose,
+                       predict_kwargs=predict_kwargs)
 
     if is_api_based and num_workers > 1:
         # Parallel processing for API-based methods
@@ -267,7 +291,8 @@ Available methods:
         print(f"{'='*60}")
         mqag = SelfCheckMQAG(device=device)
         result = evaluate_method('SelfCheckMQAG', mqag, dataset, num_passages,
-                                num_workers=1, verbose=args.verbose, needs_passage=True)
+                                num_workers=1, verbose=args.verbose, needs_passage=True,
+                                predict_kwargs={'beta1': 0.95, 'beta2': 0.95})
         results.append(result)
 
     if 'bertscore' in methods_to_run:
@@ -295,7 +320,7 @@ Available methods:
         print(f"{'='*60}")
         apiprompt = SelfCheckAPIPrompt(client_type="openai", model=args.api_model)
         result = evaluate_method('SelfCheckAPIPrompt', apiprompt, dataset, num_passages,
-                                num_workers=args.workers, verbose=args.verbose)
+                                num_workers=args.workers, verbose=args.verbose, supports_verbose=True)
         results.append(result)
 
     # Evaluate coherence variants
@@ -305,7 +330,7 @@ Available methods:
         print(f"{'='*60}")
         shogenji = SelfCheckShogenji(model=args.api_model)
         result = evaluate_method('SelfCheckShogenji', shogenji, dataset, num_passages,
-                                num_workers=args.workers, verbose=args.verbose)
+                                num_workers=args.workers, verbose=args.verbose, supports_verbose=True)
         if hasattr(shogenji, 'client'):
             result['cache_stats'] = shogenji.client.get_cache_stats()
         results.append(result)
@@ -316,7 +341,7 @@ Available methods:
         print(f"{'='*60}")
         fitelson = SelfCheckFitelson(model=args.api_model)
         result = evaluate_method('SelfCheckFitelson', fitelson, dataset, num_passages,
-                                num_workers=args.workers, verbose=args.verbose)
+                                num_workers=args.workers, verbose=args.verbose, supports_verbose=True)
         if hasattr(fitelson, 'client'):
             result['cache_stats'] = fitelson.client.get_cache_stats()
         results.append(result)
@@ -327,7 +352,7 @@ Available methods:
         print(f"{'='*60}")
         olsson = SelfCheckOlsson(model=args.api_model)
         result = evaluate_method('SelfCheckOlsson', olsson, dataset, num_passages,
-                                num_workers=args.workers, verbose=args.verbose)
+                                num_workers=args.workers, verbose=args.verbose, supports_verbose=True)
         if hasattr(olsson, 'client'):
             result['cache_stats'] = olsson.client.get_cache_stats()
         results.append(result)
