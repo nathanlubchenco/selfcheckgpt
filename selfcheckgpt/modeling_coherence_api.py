@@ -106,7 +106,7 @@ class CoherenceAPIClient:
             "A: {statement1}\n"
             "B (given condition): {statement2}\n\n"
             "Think about:\n"
-            "1. How does knowing B affects the likelihood of A?\n"
+            "1. How does knowing B affect the likelihood of A?\n"
             "2. Is there a causal or logical relationship?\n"
             "3. P(A|B) = P(A∧B) / P(B)\n\n"
             "What is P(A|B)?"

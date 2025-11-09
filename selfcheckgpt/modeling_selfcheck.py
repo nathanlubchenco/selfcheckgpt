@@ -319,8 +319,8 @@ class SelfCheckNgram:
         else:
             raise ValueError("n must be integer >= 1")
         ngram_model.add(passage)
-        for sampled_passge in sampled_passages:
-            ngram_model.add(sampled_passge)
+        for sampled_passage in sampled_passages:
+            ngram_model.add(sampled_passage)
         ngram_model.train(k=0)
         ngram_pred = ngram_model.evaluate(sentences)
         return ngram_pred
@@ -414,7 +414,7 @@ class SelfCheckLLMPrompt:
         This function takes sentences (to be evaluated) with sampled passages (evidence), and return sent-level scores
         :param sentences: list[str] -- sentences to be evaluated, e.g. GPT text response spilt by spacy
         :param sampled_passages: list[str] -- stochastically generated responses (without sentence splitting)
-        :param verson: bool -- if True tqdm progress bar will be shown
+        :param verbose: bool -- if True tqdm progress bar will be shown
         :return sent_scores: sentence-level scores
         """
         num_sentences = len(sentences)

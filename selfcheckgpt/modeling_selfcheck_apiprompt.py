@@ -75,7 +75,7 @@ class SelfCheckAPIPrompt:
         This function takes sentences (to be evaluated) with sampled passages (evidence), and return sent-level scores
         :param sentences: list[str] -- sentences to be evaluated, e.g. GPT text response spilt by spacy
         :param sampled_passages: list[str] -- stochastically generated responses (without sentence splitting)
-        :param verson: bool -- if True tqdm progress bar will be shown
+        :param verbose: bool -- if True tqdm progress bar will be shown
         :return sent_scores: sentence-level scores
         """
         num_sentences = len(sentences)

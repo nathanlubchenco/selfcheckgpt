@@ -37,7 +37,7 @@ def question_generation_sentence_level(
         question_answer = question_answer.replace(g1_tokenizer.pad_token, "").replace(g1_tokenizer.eos_token, "")
         question_answer_split = question_answer.split(g1_tokenizer.sep_token)
         if len(question_answer_split) == 2:
-            # valid Question + Annswer output
+            # valid Question + Answer output
             num_valid_questions += 1
         else:
             continue
@@ -104,7 +104,7 @@ def question_generation_sampling(
         question_answer = question_answer.replace(g1_tokenizer.pad_token, "").replace(g1_tokenizer.eos_token, "")
         question_answer_split = question_answer.split(g1_tokenizer.sep_token)
         if len(question_answer_split) == 2:
-            # valid Question + Annswer output
+            # valid Question + Answer output
             num_valid_questions += 1
         else:
             continue
@@ -239,8 +239,8 @@ class MQAG:
         if device is None:
             device = torch.device("cpu")
         self.device = device
-        self.inti_generation = False
-        self.inti_answering = False
+        self.init_generation = False
+        self.init_answering = False
         print(f"MQAG ({g1_model_type}) initialized to {device}")
 
     def _initialize_generation(self):
@@ -317,9 +317,9 @@ class MQAG:
         num_questions: int = 5,
         **kwargs
     ):
-        if self.inti_generation == False:
+        if self.init_generation == False:
             self._initialize_generation()
-            self.inti_generation = True
+            self.init_generation = True
         if do_sample:
             questions = question_generation_sampling(
                 self.g1_model, self.g1_tokenizer,
@@ -347,13 +347,13 @@ class MQAG:
         context: str,
     ):
         """
-        :param quetions: List of x where x = {'question': str, 'options': List[str]}
+        :param questions: List of x where x = {'question': str, 'options': List[str]}
         :param context: string
         :return probs: np.array of dimension (num_questions, 4)
         """
-        if self.inti_answering == False:
+        if self.init_answering == False:
             self._initialize_answering()
-            self.inti_answering = True
+            self.init_answering = True
 
         num_questions = len(questions)
         probs = np.zeros((num_questions, 4))
